@@ -6,6 +6,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "Character/MyCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Interaction/Interactable.h"
 void AMyPlayerController::BeginPlay()
 {
 	TObjectPtr<ULocalPlayer>LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer());
@@ -49,7 +51,40 @@ void AMyPlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(IA_Sprint, ETriggerEvent::Started, this, &AMyPlayerController::StartSprinting);
 		EnhancedInputComponent->BindAction(IA_Sprint, ETriggerEvent::Completed, this, &AMyPlayerController::StopSprinting);
+	}
 
+	if (IA_Interact)
+	{
+		EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Completed, this, &AMyPlayerController::TryInteract);
+	}
+}
+
+void AMyPlayerController::TryInteract()
+{
+	FVector ViewLocation;
+	FRotator ViewRotator;
+	GetPlayerViewPoint(ViewLocation, ViewRotator);
+
+	FVector Start = ViewLocation;
+
+	FVector ForwardDirection=ViewRotator.Vector();
+	FVector End = Start + ForwardDirection * InteractRange;
+
+	FHitResult HitResult;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetPawn()); 
+
+	bool bHitted=GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
+	if (bHitted)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
+		TObjectPtr<AActor>HittedActor=HitResult.GetActor();
+		if (HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
+		{
+			IInteractable::Execute_Interact(HittedActor, GetPawn());
+		}
 	}
 }
 
@@ -100,6 +135,6 @@ void AMyPlayerController::StopSprinting(const FInputActionValue& Value)
 {
 	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
-	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 400.f;
+	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = ControllCharacter->MovementSpeed;
 
 }

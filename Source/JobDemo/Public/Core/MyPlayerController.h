@@ -34,6 +34,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputAction>IA_Sprint;
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void TryInteract();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Interact")
+	TObjectPtr<UInputAction>IA_Interact;
+
+	float InteractRange = 400.f;
 private:
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);
