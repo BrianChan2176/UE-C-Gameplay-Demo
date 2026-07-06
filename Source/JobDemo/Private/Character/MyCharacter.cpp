@@ -4,6 +4,7 @@
 #include "Character/MyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -16,7 +17,7 @@ AMyCharacter::AMyCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 
-
+	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 }
 
 // Called when the game starts or when spawned

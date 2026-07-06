@@ -92,7 +92,7 @@ void AMyPlayerController::StartSprinting(const FInputActionValue& Value)
 {
 	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
-	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 1500.f;
+	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 1200.f;
 
 }
 
@@ -100,6 +100,6 @@ void AMyPlayerController::StopSprinting(const FInputActionValue& Value)
 {
 	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
-	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 400.f;
 
 }
