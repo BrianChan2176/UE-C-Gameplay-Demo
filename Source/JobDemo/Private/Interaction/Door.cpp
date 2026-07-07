@@ -33,7 +33,7 @@ void ADoor::Interact_Implementation(AActor* Interactor)
 
 FText ADoor::GetInteractText_Implementation()
 {
-	return FText::FromString(TEXT(""));
+	return FText::FromString(TEXT("按 F 开门"));
 }
 
 // Called when the game starts or when spawned

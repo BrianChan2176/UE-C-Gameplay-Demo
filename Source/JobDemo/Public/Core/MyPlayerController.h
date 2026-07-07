@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 
+
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -17,9 +18,6 @@ class JOBDEMO_API AMyPlayerController : public APlayerController
 public:
 
 protected:
-	virtual void BeginPlay()override;
-	virtual void SetupInputComponent()override;
-
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
 
@@ -35,13 +33,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputAction>IA_Sprint;
 
-	UFUNCTION(BlueprintCallable, Category = "Interact")
-	void TryInteract();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Interact")
 	TObjectPtr<UInputAction>IA_Interact;
 
-	float InteractRange = 400.f;
+
+
+
+
+protected:
+	virtual void BeginPlay()override;
+
+	virtual void SetupInputComponent()override;
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void TryInteract();
+
+
 private:
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);

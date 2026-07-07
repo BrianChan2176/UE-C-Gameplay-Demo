@@ -7,6 +7,8 @@
 #include "MyCharacter.generated.h"
 class USpringArmComponent;
 class UCameraComponent;
+class UUserWidget;
+class UTextBlock;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter
 {
@@ -15,6 +17,17 @@ class JOBDEMO_API AMyCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMyCharacter();
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void TryInteract();
+
+	void MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector);
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,18 +39,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf <UUserWidget>InteractPromptWidgetClass;
 
+	UPROPERTY()
+	TObjectPtr<UUserWidget>InteractPromptWidget;
+
+	UPROPERTY()
+	TObjectPtr<AActor>CurrentInteractable;
+protected:
+
+	void CheckInteract();
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	void MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 	float MovementSpeed = 400.f;
 
+	float InteractRange = 400.f;
 
 };

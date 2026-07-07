@@ -61,31 +61,9 @@ void AMyPlayerController::SetupInputComponent()
 
 void AMyPlayerController::TryInteract()
 {
-	FVector ViewLocation;
-	FRotator ViewRotator;
-	GetPlayerViewPoint(ViewLocation, ViewRotator);
-
-	FVector Start = ViewLocation;
-
-	FVector ForwardDirection=ViewRotator.Vector();
-	FVector End = Start + ForwardDirection * InteractRange;
-
-	FHitResult HitResult;
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetPawn()); 
-
-	bool bHitted=GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
-	if (bHitted)
-	{
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
-		TObjectPtr<AActor>HittedActor=HitResult.GetActor();
-		if (HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
-		{
-			IInteractable::Execute_Interact(HittedActor, GetPawn());
-		}
-	}
+	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	if (!ControllCharacter) { return; }
+	ControllCharacter->TryInteract();
 }
 
 void AMyPlayerController::Move(const FInputActionValue& Value)
