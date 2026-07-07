@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "MyCharacter.generated.h"
 class USpringArmComponent;
 class UCameraComponent;
@@ -53,6 +54,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorKey")
 	bool bHasDoorKey = false;
+
+	
+	FTimerHandle CheckInteractTimer;
 protected:
 
 	void CheckInteract();

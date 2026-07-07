@@ -37,6 +37,8 @@ void AMyCharacter::BeginPlay()
 			
 		}
 	}
+
+	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.5f, true);
 }
 
 void AMyCharacter::CheckInteract()
@@ -96,7 +98,7 @@ void AMyCharacter::CheckInteract()
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	CheckInteract();
+	//CheckInteract();
 }
 
 // Called to bind functionality to input
