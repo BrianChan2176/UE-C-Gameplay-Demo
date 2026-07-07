@@ -17,10 +17,14 @@ public:
 	// Sets default values for this actor's properties
 	ADoor();
 
+	void Interact_Implementation(AActor* Interactor)override;
 
-	void Interact_Implementation(AActor* Interactor);
+	FText GetInteractText_Implementation()const override;
 
-	FText GetInteractText_Implementation();
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -36,8 +40,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "DoorComponent")
 	bool bIsOpen = false;
+
+
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
 
 };

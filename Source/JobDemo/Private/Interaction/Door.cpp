@@ -4,6 +4,8 @@
 #include "Interaction/Door.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
+#include "Engine/Engine.h"
+#include "Character/MyCharacter.h"
 // Sets default values
 ADoor::ADoor()
 {
@@ -22,6 +24,18 @@ ADoor::ADoor()
 
 void ADoor::Interact_Implementation(AActor* Interactor)
 {
+	TObjectPtr<AMyCharacter>Character = Cast<AMyCharacter>(Interactor);
+	if (Character)
+	{
+		bool HasKey=Character->CheckHasDoorKey();
+		if (HasKey == false)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("你当前没有钥匙，打不开门"));
+			return;
+		}
+	}
+
+	
 	if (bIsOpen == false) 
 	{
 		PivotPoint->AddWorldRotation(FRotator(0.f, 90.f, 0.f));
@@ -31,7 +45,7 @@ void ADoor::Interact_Implementation(AActor* Interactor)
 	
 }
 
-FText ADoor::GetInteractText_Implementation()
+FText ADoor::GetInteractText_Implementation()const 
 {
 	return FText::FromString(TEXT("按 F 开门"));
 }
@@ -49,4 +63,6 @@ void ADoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+
 

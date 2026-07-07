@@ -116,6 +116,16 @@ void AMyCharacter::MoveByInput(const FRotator& ControlRotation, const FVector2D&
 	AddMovementInput(RightDirection, MoveVector.X);
 }
 
+void AMyCharacter::TookDoorKey()
+{
+	bHasDoorKey = true;
+}
+
+bool AMyCharacter::CheckHasDoorKey() const
+{
+	return bHasDoorKey;
+}
+
 void AMyCharacter::TryInteract()
 {
 	FVector ViewLocation;

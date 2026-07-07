@@ -28,7 +28,10 @@ public:
 
 	void MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector);
 
-
+	UFUNCTION(BlueprintCallable, Category = "DoorKey")
+	void TookDoorKey();
+	UFUNCTION(BlueprintCallable, Category = "DoorKey")
+	bool CheckHasDoorKey()const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,6 +50,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AActor>CurrentInteractable;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorKey")
+	bool bHasDoorKey = false;
 protected:
 
 	void CheckInteract();
