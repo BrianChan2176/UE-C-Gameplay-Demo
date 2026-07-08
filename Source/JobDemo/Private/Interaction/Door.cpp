@@ -24,7 +24,7 @@ ADoor::ADoor()
 
 void ADoor::Interact_Implementation(AActor* Interactor)
 {
-	TObjectPtr<AMyCharacter>Character = Cast<AMyCharacter>(Interactor);
+	AMyCharacter* Character = Cast<AMyCharacter>(Interactor);
 	if (Character)
 	{
 		bool HasKey=Character->CheckHasDoorKey();

@@ -22,7 +22,7 @@ void ADoorKey::BeginPlay()
 
 void ADoorKey::Interact_Implementation(AActor* Interactor)
 {
-	TObjectPtr<AMyCharacter>Character = Cast<AMyCharacter>(Interactor);
+	AMyCharacter* Character = Cast<AMyCharacter>(Interactor);
 	if (Character) 
 	{
 		Character->TookDoorKey();

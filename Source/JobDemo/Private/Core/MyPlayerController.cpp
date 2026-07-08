@@ -10,10 +10,10 @@
 #include "Interaction/Interactable.h"
 void AMyPlayerController::BeginPlay()
 {
-	TObjectPtr<ULocalPlayer>LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer());
+	ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer());
 	if (LocalPlayer)
 	{
-		TObjectPtr<UEnhancedInputLocalPlayerSubsystem>Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 		if (Subsystem)
 		{
 			if (MappingContext)
@@ -28,7 +28,7 @@ void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	TObjectPtr<UEnhancedInputComponent>EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	if (!EnhancedInputComponent) { return; }
 
 	if (IA_Move) 
@@ -61,7 +61,7 @@ void AMyPlayerController::SetupInputComponent()
 
 void AMyPlayerController::TryInteract()
 {
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->TryInteract();
 }
@@ -70,7 +70,7 @@ void AMyPlayerController::Move(const FInputActionValue& Value)
 {
 	FVector2D MoveVector = Value.Get<FVector2D>();
 
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->MoveByInput(GetControlRotation(), MoveVector);
 
@@ -85,7 +85,7 @@ void AMyPlayerController::LookAround(const FInputActionValue& Value)
 
 void AMyPlayerController::StarJumping(const FInputActionValue& Value)
 {
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->Jump();
 
@@ -93,7 +93,7 @@ void AMyPlayerController::StarJumping(const FInputActionValue& Value)
 
 void AMyPlayerController::StopJumping(const FInputActionValue& Value)
 {
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->StopJumping();
 
@@ -103,7 +103,7 @@ void AMyPlayerController::StopJumping(const FInputActionValue& Value)
 
 void AMyPlayerController::StartSprinting(const FInputActionValue& Value)
 {
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = 1200.f;
 
@@ -111,7 +111,7 @@ void AMyPlayerController::StartSprinting(const FInputActionValue& Value)
 
 void AMyPlayerController::StopSprinting(const FInputActionValue& Value)
 {
-	TObjectPtr<AMyCharacter>ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = ControllCharacter->MovementSpeed;
 

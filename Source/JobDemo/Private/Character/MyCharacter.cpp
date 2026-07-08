@@ -38,7 +38,7 @@ void AMyCharacter::BeginPlay()
 		}
 	}
 
-	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.5f, true);
+	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
 }
 
 void AMyCharacter::CheckInteract()
@@ -62,7 +62,7 @@ void AMyCharacter::CheckInteract()
 	if (bHitted)
 	{
 		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);//每帧画太多了先不显示了
-		TObjectPtr<AActor>HittedActor = HitResult.GetActor();
+		AActor* HittedActor = HitResult.GetActor();
 		bool bInteractable = HittedActor && HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass());
 
 		if (bInteractable)
@@ -149,7 +149,7 @@ void AMyCharacter::TryInteract()
 	if (bHitted)
 	{
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
-		TObjectPtr<AActor>HittedActor = HitResult.GetActor();
+		AActor* HittedActor = HitResult.GetActor();
 		if (HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
 		{
 			IInteractable::Execute_Interact(HittedActor, this);
