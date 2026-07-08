@@ -21,14 +21,23 @@ protected:
 
 	virtual void Tick(float DeltaTime)override;
 
+	virtual void OnMoveCompleted(FAIRequestID RequestID,const FPathFollowingResult& Result)override;
+
+	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float PatrolRadius = 1700.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	float EnoughRadius = 80.f;
+	float AcceptanceRadius = 80.f;
 
-	void MoveToRandomLocation();
+	/*void MoveToRandomLocation();
+	FTimerHandle MoveToRandomLocationTimer;*/
 
-	FTimerHandle MoveToRandomLocationTimer;
+	
+	int32 CurrentPatrolIndex=0;
+	void MoveToCurrentPatrolPoint();
+	void GoToNextPatrolPoint();
+	FTimerHandle WaitForNextPatrolTimer;
+	float PatrolWaitTime = 3.f;
 };
