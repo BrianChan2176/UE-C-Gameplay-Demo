@@ -3,6 +3,7 @@
 
 #include "AI/EnemyCharacter.h"
 #include "AI/EnemyAIController.h"
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -11,6 +12,8 @@ AEnemyCharacter::AEnemyCharacter()
 
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
 }
 
 // Called when the game starts or when spawned

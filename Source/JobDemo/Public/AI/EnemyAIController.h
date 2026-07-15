@@ -10,6 +10,12 @@
 class UAIPerceptionComponent;
 class UAISenseConfig_Sight;
 
+enum class EEnemyState : uint8
+{
+	Patrol,
+	Chasing
+};
+
 UCLASS()
 class JOBDEMO_API AEnemyAIController : public AAIController
 {
@@ -45,4 +51,14 @@ private:
 
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Target,FAIStimulus Stimulus);
+
+	//追击玩家
+	EEnemyState CurrentState = EEnemyState::Patrol;//AI当前状态
+	UPROPERTY()
+	TObjectPtr<AActor>TargetPlayer=nullptr;//当前追击的玩家
+	UPROPERTY(EditDefaultsOnly, Category = "AI Chase")
+	float ChaseAcceptanceDistance = 100.f;//追逐玩家足够距离停下
+
+	void StartChasing(AActor* Target);
+	void StopChasingAndResumePatrol();
 };

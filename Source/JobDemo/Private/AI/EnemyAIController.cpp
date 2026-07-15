@@ -30,6 +30,7 @@ AEnemyAIController::AEnemyAIController()
 	//感知组件订阅感知状态变化广播
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAIController::HandleTargetPerceptionUpdated);
 
+	
 }
 
 void AEnemyAIController::OnPossess(APawn* ControlledPawn)
@@ -49,6 +50,8 @@ void AEnemyAIController::OnPossess(APawn* ControlledPawn)
 
 void AEnemyAIController::MoveToCurrentPatrolPoint()
 {
+	if (CurrentState != EEnemyState::Patrol) { return; }
+
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetPawn());
 	if (!EnemyCharacter) { return; }
 
@@ -62,7 +65,6 @@ void AEnemyAIController::MoveToCurrentPatrolPoint()
 		GoToNextPatrolPoint();
 		return;
 	}
-
 
 	const EPathFollowingRequestResult::Type MoveResult =MoveToActor(PatrolPoint, AcceptanceRadius);
 
@@ -94,6 +96,7 @@ void AEnemyAIController::MoveToCurrentPatrolPoint()
 void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	Super::OnMoveCompleted(RequestID, Result);
+	if (CurrentState == EEnemyState::Chasing) { return; }
 
 	if (Result.Code==EPathFollowingResult::Success) 
 	{
@@ -113,6 +116,7 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 
 void AEnemyAIController::GoToNextPatrolPoint()
 {
+	if (CurrentState != EEnemyState::Patrol) { return; }
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetPawn());
 	if (!EnemyCharacter) { return; }
 
@@ -133,8 +137,43 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 	if (Stimulus.WasSuccessfullySensed()) 
 	{
 		UE_LOG(LogTemp, Display, TEXT("AI成功感知到玩家"));
+		StartChasing(Target);
 	}
-	else { UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); }
+	else 
+	{
+		UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); 
+		StopChasingAndResumePatrol();
+	}
+}
+
+void AEnemyAIController::StartChasing(AActor* Target)
+{
+	if (!Target) { return; }
+	//一定要先切换状态，不然停止巡逻可能会触发OnMoveCompeleted
+	CurrentState = EEnemyState::Chasing;
+	TargetPlayer = Target;
+	// 防止等待巡逻的Timer突然触发
+	GetWorldTimerManager().ClearTimer(WaitForNextPatrolTimer);
+	// 停止当前巡逻移动
+	StopMovement();
+	//面向Target玩家
+	SetFocus(Target);
+	//追击玩家
+	MoveToActor(Target, ChaseAcceptanceDistance);
+	UE_LOG(LogTemp, Display, TEXT("AI开始追击玩家"));
+}
+
+void AEnemyAIController::StopChasingAndResumePatrol()
+{
+	if (CurrentState != EEnemyState::Chasing) { return; }
+	//停止追击，清除玩家目标
+	StopMovement();
+	ClearFocus(EAIFocusPriority::Gameplay);
+	CurrentState = EEnemyState::Patrol;
+	TargetPlayer = nullptr;
+	//恢复巡逻
+	MoveToCurrentPatrolPoint();
+	UE_LOG(LogTemp, Display, TEXT("AI停止追击玩家，返回巡逻"));
 }
 
 
