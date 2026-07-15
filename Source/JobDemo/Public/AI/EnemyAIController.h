@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "EnemyAIController.generated.h"
 
-/**
- * 
- */
+class UAIPerceptionComponent;
+class UAISenseConfig_Sight;
+
 UCLASS()
 class JOBDEMO_API AEnemyAIController : public AAIController
 {
@@ -23,21 +24,25 @@ protected:
 
 	virtual void OnMoveCompleted(FAIRequestID RequestID,const FPathFollowingResult& Result)override;
 
-	
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	float PatrolRadius = 1700.f;
+	float AcceptanceRadius = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	float AcceptanceRadius = 80.f;
-
-	/*void MoveToRandomLocation();
-	FTimerHandle MoveToRandomLocationTimer;*/
-
+	FTimerHandle StartPatrolTimerHandle;
 	
 	int32 CurrentPatrolIndex=0;
 	void MoveToCurrentPatrolPoint();
 	void GoToNextPatrolPoint();
 	FTimerHandle WaitForNextPatrolTimer;
-	float PatrolWaitTime = 3.f;
+	float PatrolWaitTime = 2.f;
+
+	//感知玩家
+	UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+	TObjectPtr<UAIPerceptionComponent>AIPerceptionComponent;
+	UPROPERTY()
+	TObjectPtr<UAISenseConfig_Sight>SightConfig;
+
+	UFUNCTION()
+	void HandleTargetPerceptionUpdated(AActor* Target,FAIStimulus Stimulus);
 };

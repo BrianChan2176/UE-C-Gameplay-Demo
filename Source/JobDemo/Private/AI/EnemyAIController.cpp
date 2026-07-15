@@ -5,10 +5,31 @@
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "AI/EnemyCharacter.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemyAIController::AEnemyAIController()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	//设置感知组件
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
+	SetPerceptionComponent(*PerceptionComponent);
+	//设置视觉配置
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	SightConfig->SightRadius = 1200.f;
+	SightConfig->LoseSightRadius = 1500.f;
+	SightConfig->PeripheralVisionAngleDegrees = 60.f;
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	// 把视觉配置交给感知组件
+	AIPerceptionComponent->ConfigureSense(*SightConfig);
+	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+	//感知组件订阅感知状态变化广播
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAIController::HandleTargetPerceptionUpdated);
+
 }
 
 void AEnemyAIController::OnPossess(APawn* ControlledPawn)
@@ -16,14 +37,13 @@ void AEnemyAIController::OnPossess(APawn* ControlledPawn)
 	Super::OnPossess(ControlledPawn);
 
 	CurrentPatrolIndex = 0;
-	MoveToCurrentPatrolPoint();
 
-/*	GetWorldTimerManager().SetTimer(
-		MoveToRandomLocationTimer,
+	GetWorldTimerManager().SetTimer(//第一次移动要等东西加载，不然会失败直接跳过第一个目标点
+		StartPatrolTimerHandle,
 		this,
-		&AEnemyAIController::MoveToRandomLocation,
-		FMath::FRandRange(1.f, 2.f),
-		true);*/
+		&AEnemyAIController::MoveToCurrentPatrolPoint,
+		1.f,
+		false);
 
 }
 
@@ -43,7 +63,31 @@ void AEnemyAIController::MoveToCurrentPatrolPoint()
 		return;
 	}
 
-	MoveToActor(PatrolPoint, AcceptanceRadius);
+
+	const EPathFollowingRequestResult::Type MoveResult =MoveToActor(PatrolPoint, AcceptanceRadius);
+
+	if (MoveResult == EPathFollowingRequestResult::AlreadyAtGoal)
+	{
+		GetWorldTimerManager().SetTimer(
+			WaitForNextPatrolTimer,
+			this,
+			&AEnemyAIController::GoToNextPatrolPoint,
+			PatrolWaitTime,
+			false
+		);
+	}
+	else if (MoveResult == EPathFollowingRequestResult::Failed)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MoveTo PatrolPoint failed: %s"), *GetNameSafe(PatrolPoint));
+
+		GetWorldTimerManager().SetTimer(
+			WaitForNextPatrolTimer,
+			this,
+			&AEnemyAIController::GoToNextPatrolPoint,
+			PatrolWaitTime,
+			false
+		);
+	}
 }
 
 
@@ -61,7 +105,7 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 			this,
 			&AEnemyAIController::GoToNextPatrolPoint,
 			0.2f,
-			false);//要有Timer延迟一下不然会:GoToNextPatrolPoint→MoveToCurrentPatrolPoint→回来OnMoveCompleted，又失败得太快然后递归太深最后StackOverFlow
+			false);//要有Timer延迟一下不然失败的时候会:GoToNextPatrolPoint→MoveToCurrentPatrolPoint→回来OnMoveCompleted，又失败得太快然后递归太深最后StackOverFlow
 
 		return;
 	}
@@ -79,38 +123,25 @@ void AEnemyAIController::GoToNextPatrolPoint()
 	MoveToCurrentPatrolPoint();
 }
 
-
-/*void AEnemyAIController::MoveToRandomLocation()
+void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimulus Stimulus)
 {
-	if (GetMoveStatus() == EPathFollowingStatus::Moving){return;}
-
-
-	APawn* ControlledPawn = GetPawn();
-	if (!ControlledPawn) { return; }
-
-	UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-	if (!NavigationSystem) { return; }
-
-	FNavLocation RandomLocation;
-	const bool bFoundLocation = NavigationSystem->GetRandomReachablePointInRadius(
-		ControlledPawn->GetActorLocation(),
-		PatrolRadius,
-		RandomLocation
-	);
-
-	if (bFoundLocation)
+	APawn* PlayerPawn=UGameplayStatics::GetPlayerPawn(this, 0);
+	if (Target != PlayerPawn)
 	{
-		MoveToLocation(RandomLocation.Location, EnoughRadius);
+		return;
 	}
-	
-}*/
+	if (Stimulus.WasSuccessfullySensed()) 
+	{
+		UE_LOG(LogTemp, Display, TEXT("AI成功感知到玩家"));
+	}
+	else { UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); }
+}
+
+
 
 void AEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-/*	if (GetMoveStatus() != EPathFollowingStatus::Moving) 
-	{
-		MoveToRandomLocation();
-	}*/
+
 }
