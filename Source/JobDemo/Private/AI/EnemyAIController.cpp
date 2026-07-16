@@ -11,7 +11,7 @@
 
 AEnemyAIController::AEnemyAIController()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;//要开因为AI Perception靠Controller的ControllRotation更新，关了Controller不更新→Perception不更新→视觉锥不更i性能
 
 	//设置感知组件
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
