@@ -15,7 +15,7 @@ AEnemyAIController::AEnemyAIController()
 
 	//设置感知组件
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
-	SetPerceptionComponent(*PerceptionComponent);
+	SetPerceptionComponent(*AIPerceptionComponent);
 	//设置视觉配置
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	SightConfig->SightRadius = 1200.f;
@@ -62,7 +62,13 @@ void AEnemyAIController::MoveToCurrentPatrolPoint()
 	AActor* PatrolPoint = EnemyCharacter->PatrolPointsArray[CurrentPatrolIndex];
 	if (!PatrolPoint)
 	{
-		GoToNextPatrolPoint();
+		GetWorldTimerManager().SetTimer(
+			WaitForNextPatrolTimer,
+			this,
+			&AEnemyAIController::GoToNextPatrolPoint,
+			0.2f,
+			false
+		);
 		return;
 	}
 
@@ -137,11 +143,20 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 	if (Stimulus.WasSuccessfullySensed()) 
 	{
 		UE_LOG(LogTemp, Display, TEXT("AI成功感知到玩家"));
+
 		StartChasing(Target);
+
+		GetWorldTimerManager().SetTimer(KeepSensingPlayer,
+			this,
+			&AEnemyAIController::KeepChasing,
+			KeepChasingInveral,
+			true
+		);
 	}
 	else 
 	{
 		UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); 
+		GetWorldTimerManager().ClearTimer(KeepSensingPlayer);
 		StopChasingAndResumePatrol();
 	}
 }
@@ -174,6 +189,16 @@ void AEnemyAIController::StopChasingAndResumePatrol()
 	//恢复巡逻
 	MoveToCurrentPatrolPoint();
 	UE_LOG(LogTemp, Display, TEXT("AI停止追击玩家，返回巡逻"));
+}
+
+void AEnemyAIController::KeepChasing()
+{
+	if (!TargetPlayer) { return; }
+	if (CurrentState != EEnemyState::Chasing) { return; }
+
+	//如果MoveToActor正在追踪玩家，不需要重复发送请求
+	if (GetMoveStatus() == EPathFollowingStatus::Moving){return;}
+	MoveToActor(TargetPlayer, ChaseAcceptanceDistance);
 }
 
 

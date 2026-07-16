@@ -3,7 +3,7 @@
 
 #include "AI/EnemyCharacter.h"
 #include "AI/EnemyAIController.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -13,7 +13,9 @@ AEnemyCharacter::AEnemyCharacter()
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 300.0f, 0.0f);
 }
 
 // Called when the game starts or when spawned
