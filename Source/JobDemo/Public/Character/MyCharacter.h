@@ -65,6 +65,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 	float MovementSpeed = 400.f;
 
-	float InteractRange = 400.f;
+	float InteractRange = 600.f;
 
 };

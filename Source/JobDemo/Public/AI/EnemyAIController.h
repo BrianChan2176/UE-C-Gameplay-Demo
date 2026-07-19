@@ -62,7 +62,7 @@ private:
 	void StartChasing(AActor* Target);
 	void StopChasingAndResumePatrol();
 
-	FTimerHandle KeepSensingPlayer;
+	FTimerHandle ChaseUpdateTimerHandle;
 	void KeepChasing();
-	float KeepChasingInveral = 0.5f;
+	float ChaseUpdateInveral = 0.5f;
 };

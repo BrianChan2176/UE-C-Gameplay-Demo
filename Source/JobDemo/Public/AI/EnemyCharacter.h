@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "EnemyCharacter.generated.h"
 
+class UHealthComponent;
+
 UCLASS()
 class JOBDEMO_API AEnemyCharacter : public ACharacter
 {
@@ -24,7 +26,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "HealthComponent")
+	TObjectPtr<UHealthComponent>HealthComponent;
 
 public:	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI Partrol")

@@ -11,7 +11,7 @@
 
 AEnemyAIController::AEnemyAIController()
 {
-	PrimaryActorTick.bCanEverTick = true;//要开因为AI Perception靠Controller的ControllRotation更新，关了Controller不更新→Perception不更新→视觉锥不更i性能
+	PrimaryActorTick.bCanEverTick = true;//要开因为AI Perception靠Controller的ControllRotation更新，关了Controller不更新→Perception不更新→视觉锥会固定
 
 	//设置感知组件
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
@@ -146,17 +146,17 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 
 		StartChasing(Target);
 
-		GetWorldTimerManager().SetTimer(KeepSensingPlayer,
+		GetWorldTimerManager().SetTimer(ChaseUpdateTimerHandle,
 			this,
 			&AEnemyAIController::KeepChasing,
-			KeepChasingInveral,
+			ChaseUpdateInveral,
 			true
 		);
 	}
 	else 
 	{
 		UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); 
-		GetWorldTimerManager().ClearTimer(KeepSensingPlayer);
+		GetWorldTimerManager().ClearTimer(ChaseUpdateTimerHandle);
 		StopChasingAndResumePatrol();
 	}
 }
