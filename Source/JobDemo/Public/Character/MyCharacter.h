@@ -33,6 +33,9 @@ public:
 	void TookDoorKey();
 	UFUNCTION(BlueprintCallable, Category = "DoorKey")
 	bool CheckHasDoorKey()const;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ShootDamage();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -67,4 +70,8 @@ public:
 
 	float InteractRange = 600.f;
 
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = "Combat")
+	float ShootRange = 2000.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
+	float Damage = 25.f;
 };

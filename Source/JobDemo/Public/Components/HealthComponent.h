@@ -39,16 +39,11 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HealthComponent", meta = (ClampMin = "1.0"))
 	float MaxHealth = 100.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HealthComponent")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "HealthComponent")
 	float CurrentHealth = 100.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HealthComponent")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "HealthComponent")
 	bool bIsDead = false;
-
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	UFUNCTION()

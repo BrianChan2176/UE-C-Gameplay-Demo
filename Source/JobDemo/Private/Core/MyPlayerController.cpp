@@ -8,8 +8,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Interaction/Interactable.h"
+#include "Blueprint/UserWidget.h"
 void AMyPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+
 	ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer());
 	if (LocalPlayer)
 	{
@@ -20,6 +23,15 @@ void AMyPlayerController::BeginPlay()
 			{
 				Subsystem->AddMappingContext(MappingContext, 0);
 			}
+		}
+	}
+
+	if (CrosshairWidgetClass) 
+	{
+		CrosshairWidget = CreateWidget<UUserWidget>(this, CrosshairWidgetClass);
+		if (CrosshairWidget)
+		{
+			CrosshairWidget->AddToViewport();
 		}
 	}
 }
@@ -56,6 +68,11 @@ void AMyPlayerController::SetupInputComponent()
 	if (IA_Interact)
 	{
 		EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Completed, this, &AMyPlayerController::TryInteract);
+	}
+
+	if (IA_Shoot)
+	{
+		EnhancedInputComponent->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AMyPlayerController::Shoot);
 	}
 }
 
@@ -115,4 +132,11 @@ void AMyPlayerController::StopSprinting(const FInputActionValue& Value)
 	if (!ControllCharacter) { return; }
 	ControllCharacter->GetCharacterMovement()->MaxWalkSpeed = ControllCharacter->MovementSpeed;
 
+}
+
+void AMyPlayerController::Shoot(const FInputActionValue& Value)
+{
+	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
+	if (!ControllCharacter) { return; }
+	ControllCharacter->ShootDamage();
 }

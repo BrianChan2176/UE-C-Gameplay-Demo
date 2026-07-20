@@ -30,7 +30,7 @@ protected:
 
 	virtual void OnMoveCompleted(FAIRequestID RequestID,const FPathFollowingResult& Result)override;
 
-
+	virtual void BeginPlay()override;
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float AcceptanceRadius = 0.f;

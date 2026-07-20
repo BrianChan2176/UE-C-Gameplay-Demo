@@ -120,6 +120,12 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 	}
 }
 
+void AEnemyAIController::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
 void AEnemyAIController::GoToNextPatrolPoint()
 {
 	if (CurrentState != EEnemyState::Patrol) { return; }

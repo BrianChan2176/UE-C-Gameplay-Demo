@@ -7,6 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/Interactable.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/DamageType.h"
+
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -126,6 +130,35 @@ void AMyCharacter::TookDoorKey()
 bool AMyCharacter::CheckHasDoorKey() const
 {
 	return bHasDoorKey;
+}
+
+void AMyCharacter::ShootDamage()
+{
+	FVector ViewLocation;
+	FRotator ViewRotator;
+	GetController()->GetPlayerViewPoint(ViewLocation, ViewRotator);
+
+	FVector Start = ViewLocation;
+
+	FVector ForwardDirection = ViewRotator.Vector();
+	FVector End = Start + ForwardDirection * ShootRange;
+
+	FHitResult HitResult;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
+	if (bHitted)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
+		AActor* HittedActor = HitResult.GetActor();
+		if (!HittedActor) { return; }
+		UGameplayStatics::ApplyDamage(HittedActor, Damage, GetController(), this, UDamageType::StaticClass());
+
+	}
+
 }
 
 void AMyCharacter::TryInteract()

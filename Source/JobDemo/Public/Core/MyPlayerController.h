@@ -8,7 +8,7 @@
 #include "MyPlayerController.generated.h"
 class UInputMappingContext;
 class UInputAction;
-
+class UUserWidget;
 
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
@@ -37,10 +37,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Interact")
 	TObjectPtr<UInputAction>IA_Interact;
 
-
-
-
-
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TObjectPtr<UInputAction>IA_Shoot;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Combat")
+	TSubclassOf<UUserWidget>CrosshairWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UUserWidget>CrosshairWidget;
 protected:
 	virtual void BeginPlay()override;
 
@@ -57,5 +59,5 @@ private:
 	void StopJumping(const FInputActionValue& Value);
 	void StartSprinting(const FInputActionValue& Value);
 	void StopSprinting(const FInputActionValue& Value);
-
+	void Shoot(const FInputActionValue& Value);
 };

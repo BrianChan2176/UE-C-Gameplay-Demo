@@ -18,6 +18,7 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentHealth = MaxHealth;
 
 	if (AActor* Owner = GetOwner())
 	{
@@ -27,16 +28,6 @@ void UHealthComponent::BeginPlay()
 	
 }
 
-
-
-
-// Called every frame
-void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
 
 void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,
 	float Damage,
@@ -54,6 +45,7 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,
 	{
 		bIsDead = true;
 		OnDeath.Broadcast();
+
 		UE_LOG(LogTemp, Display, TEXT("%s is Dead"), *GetNameSafe(DamagedActor));
 	}
 
