@@ -7,6 +7,7 @@
 #include "Components/HealthComponent.h"
 #include "Components/CapsuleComponent.h"
 
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -32,6 +33,7 @@ void AEnemyCharacter::BeginPlay()
 	{
 		HealthComponent->OnDeath.AddDynamic(this, &AEnemyCharacter::HandleDeath);
 	}
+
 }
 
 void AEnemyCharacter::HandleDeath()
@@ -49,8 +51,20 @@ void AEnemyCharacter::HandleDeath()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	SetLifeSpan(3.f);
-	UE_LOG(LogTemp,Display,TEXT("%s started Dying"),*GetName());
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (MeshComponent && MeshComponent->GetPhysicsAsset())
+	{
+
+		MeshComponent->SetCollisionProfileName(TEXT("Ragdoll"));//给MeshComponent使用名为 Ragdoll 的碰撞预设规则
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);//开启两类碰撞：Query允许射线检测 Physics允许真实物理碰撞
+		MeshComponent->SetSimulatePhysics(true);;//让身体骨骼网格开始进行物理模拟。
+		MeshComponent->WakeAllRigidBodies();//让所有骨骼刚体立即活动
+	}
+	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"),*GetName()); }
+
+	float DestoryDelay = 3.f;
+	SetLifeSpan(DestoryDelay);
+
 }
 
 // Called every frame

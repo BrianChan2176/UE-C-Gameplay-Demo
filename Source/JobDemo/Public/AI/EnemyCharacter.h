@@ -31,6 +31,8 @@ protected:
 
 	UFUNCTION()
 	void HandleDeath();
+
+
 public:	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI Partrol")
 	TArray<AActor*>PatrolPointsArray;
