@@ -29,6 +29,8 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "HealthComponent")
 	TObjectPtr<UHealthComponent>HealthComponent;
 
+	UFUNCTION()
+	void HandleDeath();
 public:	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI Partrol")
 	TArray<AActor*>PatrolPointsArray;

@@ -134,9 +134,12 @@ bool AMyCharacter::CheckHasDoorKey() const
 
 void AMyCharacter::ShootDamage()
 {
+	AController* OwnerController=GetController();
+	if (!OwnerController) { return; }
+
 	FVector ViewLocation;
 	FRotator ViewRotator;
-	GetController()->GetPlayerViewPoint(ViewLocation, ViewRotator);
+	OwnerController->GetPlayerViewPoint(ViewLocation, ViewRotator);
 
 	FVector Start = ViewLocation;
 
@@ -155,7 +158,7 @@ void AMyCharacter::ShootDamage()
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
-		UGameplayStatics::ApplyDamage(HittedActor, Damage, GetController(), this, UDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(HittedActor, Damage, OwnerController, this, UDamageType::StaticClass());
 
 	}
 

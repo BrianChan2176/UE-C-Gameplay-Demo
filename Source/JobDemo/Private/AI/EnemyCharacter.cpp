@@ -5,6 +5,7 @@
 #include "AI/EnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/HealthComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -27,7 +28,29 @@ void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	if (HealthComponent) 
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &AEnemyCharacter::HandleDeath);
+	}
+}
+
+void AEnemyCharacter::HandleDeath()
+{
+	AEnemyAIController* EnemyController = Cast<AEnemyAIController>(GetController());
+	if (EnemyController)
+	{
+		EnemyController->StopMovement();
+		EnemyController->ClearFocus(EAIFocusPriority::Gameplay);
+		EnemyController->UnPossess();
+		EnemyController->Destroy();
+	}
+
+	GetCharacterMovement()->DisableMovement();
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	SetLifeSpan(3.f);
+	UE_LOG(LogTemp,Display,TEXT("%s started Dying"),*GetName());
 }
 
 // Called every frame
