@@ -154,7 +154,7 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 
 		GetWorldTimerManager().SetTimer(ChaseUpdateTimerHandle,
 			this,
-			&AEnemyAIController::KeepChasing,
+			&AEnemyAIController::UpdateChase,
 			ChaseUpdateInveral,
 			true
 		);
@@ -197,14 +197,30 @@ void AEnemyAIController::StopChasingAndResumePatrol()
 	UE_LOG(LogTemp, Display, TEXT("AI停止追击玩家，返回巡逻"));
 }
 
-void AEnemyAIController::KeepChasing()
+void AEnemyAIController::UpdateChase()
 {
+	//移动追击玩家
 	if (!TargetPlayer) { return; }
 	if (CurrentState != EEnemyState::Chasing) { return; }
-
 	//如果MoveToActor正在追踪玩家，不需要重复发送请求
 	if (GetMoveStatus() == EPathFollowingStatus::Moving){return;}
 	MoveToActor(TargetPlayer, ChaseAcceptanceDistance);
+
+	//攻击玩家
+	if (!bCanAttack) { return; }
+	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetCharacter());
+	if (EnemyCharacter && TargetPlayer)
+	{
+		EnemyCharacter->AttackTarget(TargetPlayer);
+		bCanAttack = false;
+		GetWorldTimerManager().SetTimer(AttackCoolDownTimerHandle, this, &AEnemyAIController::ResetAttackCoolDown, AttackCoolDown, false);
+	}
+
+}
+
+void AEnemyAIController::ResetAttackCoolDown()
+{
+	bCanAttack = true;
 }
 
 

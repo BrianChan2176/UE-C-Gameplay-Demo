@@ -9,7 +9,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
-
+#include "Components/HealthComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -24,6 +24,8 @@ AMyCharacter::AMyCharacter()
 	FollowCamera->SetupAttachment(CameraBoom);
 
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +45,8 @@ void AMyCharacter::BeginPlay()
 	}
 
 	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
+
+	
 }
 
 void AMyCharacter::CheckInteract()

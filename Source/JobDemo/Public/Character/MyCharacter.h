@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-
 #include "MyCharacter.generated.h"
 class USpringArmComponent;
 class UCameraComponent;
 class UUserWidget;
 class UTextBlock;
+class UHealthComponent;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter
 {
@@ -58,8 +58,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorKey")
 	bool bHasDoorKey = false;
 
-	
 	FTimerHandle CheckInteractTimer;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UHealthComponent>HealthComponent;
 protected:
 
 	void CheckInteract();

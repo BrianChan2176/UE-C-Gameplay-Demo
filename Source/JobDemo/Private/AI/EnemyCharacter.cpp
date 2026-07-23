@@ -6,7 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/CapsuleComponent.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/DamageType.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -34,6 +35,7 @@ void AEnemyCharacter::BeginPlay()
 		HealthComponent->OnDeath.AddDynamic(this, &AEnemyCharacter::HandleDeath);
 	}
 
+	
 }
 
 void AEnemyCharacter::HandleDeath()
@@ -62,9 +64,39 @@ void AEnemyCharacter::HandleDeath()
 	}
 	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"),*GetName()); }
 
-	float DestoryDelay = 3.f;
+	float DestoryDelay = 0.4f;
 	SetLifeSpan(DestoryDelay);
+}
 
+void AEnemyCharacter::AttackTarget(AActor* Target)
+{
+	AController* OwnerController = GetController();
+	if (!OwnerController) { return; }
+
+	FVector ViewLocation;
+	FRotator ViewRotator;
+	OwnerController->GetPlayerViewPoint(ViewLocation, ViewRotator);
+
+	FVector Start = ViewLocation;
+
+	FVector ForwardDirection = ViewRotator.Vector();
+	FVector End = Start + ForwardDirection * AIAttackRange;
+
+	FHitResult HitResult;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
+	if (bHitted)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
+		AActor* HittedActor = HitResult.GetActor();
+		if (!HittedActor) { return; }
+		UGameplayStatics::ApplyDamage(HittedActor, AIDamage, OwnerController, this, UDamageType::StaticClass());
+		UE_LOG(LogTemp,Display,TEXT("AI 攻击了 %s"),*HittedActor->GetName())
+	}
 }
 
 // Called every frame

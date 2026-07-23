@@ -32,9 +32,17 @@ protected:
 	UFUNCTION()
 	void HandleDeath();
 
+	//AI射击
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
+	float AIAttackRange = 1000.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
+	float AIDamage = 10.f;
 
 public:	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI Partrol")
 	TArray<AActor*>PatrolPointsArray;
 
+	//AI射击
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	void AttackTarget(AActor* Target);
 };

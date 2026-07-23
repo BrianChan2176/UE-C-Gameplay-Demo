@@ -63,6 +63,12 @@ private:
 	void StopChasingAndResumePatrol();
 
 	FTimerHandle ChaseUpdateTimerHandle;
-	void KeepChasing();
+	void UpdateChase();
 	float ChaseUpdateInveral = 0.5f;
+
+	//攻击玩家
+	bool bCanAttack = true;
+	void ResetAttackCoolDown();
+	FTimerHandle AttackCoolDownTimerHandle;
+	float AttackCoolDown = 1.f;
 };
