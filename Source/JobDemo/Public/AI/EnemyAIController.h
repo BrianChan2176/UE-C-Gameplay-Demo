@@ -57,7 +57,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<AActor>TargetPlayer=nullptr;//当前追击的玩家
 	UPROPERTY(EditDefaultsOnly, Category = "AI Chase")
-	float ChaseAcceptanceDistance = 100.f;//追逐玩家足够距离停下
+	float ChaseAcceptanceDistance = 700.f;//追逐玩家足够距离停下
 
 	void StartChasing(AActor* Target);
 	void StopChasingAndResumePatrol();
@@ -71,4 +71,5 @@ private:
 	void ResetAttackCoolDown();
 	FTimerHandle AttackCoolDownTimerHandle;
 	float AttackCoolDown = 1.f;
+	float AIAttackRange = 1000.f;
 };

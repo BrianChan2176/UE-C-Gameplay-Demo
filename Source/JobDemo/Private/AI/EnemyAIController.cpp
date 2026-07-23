@@ -202,12 +202,26 @@ void AEnemyAIController::UpdateChase()
 	//移动追击玩家
 	if (!TargetPlayer) { return; }
 	if (CurrentState != EEnemyState::Chasing) { return; }
-	//如果MoveToActor正在追踪玩家，不需要重复发送请求
-	if (GetMoveStatus() == EPathFollowingStatus::Moving){return;}
-	MoveToActor(TargetPlayer, ChaseAcceptanceDistance);
 
-	//攻击玩家
+
+	//用攻击距离区分追击和攻击状态
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn) { return; }
+	const float TargetDistance = FVector::Dist(ControlledPawn->GetActorLocation(), TargetPlayer->GetActorLocation());
+	if (TargetDistance > AIAttackRange) //如果没进入攻击距离就追击玩家
+	{
+		if (GetMoveStatus() != EPathFollowingStatus::Moving) 
+		{
+			MoveToActor(TargetPlayer, ChaseAcceptanceDistance);
+
+		}
+		return;
+	}
+	 
+	//已经进入攻击距离就停止移动并攻击玩家
+	StopMovement();
 	if (!bCanAttack) { return; }
+
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetCharacter());
 	if (EnemyCharacter && TargetPlayer)
 	{
@@ -216,11 +230,13 @@ void AEnemyAIController::UpdateChase()
 		GetWorldTimerManager().SetTimer(AttackCoolDownTimerHandle, this, &AEnemyAIController::ResetAttackCoolDown, AttackCoolDown, false);
 	}
 
+
 }
 
 void AEnemyAIController::ResetAttackCoolDown()
 {
 	bCanAttack = true;
+
 }
 
 

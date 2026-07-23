@@ -86,7 +86,12 @@ void AEnemyCharacter::AttackTarget(AActor* Target)
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
+	
+	//旋转敌人身体面向玩家
+	FVector PlayerDirection = Target->GetActorLocation() - GetActorLocation();
+	SetActorRotation(PlayerDirection.Rotation());
 
+	//继续射线
 	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
 	if (bHitted)
@@ -95,7 +100,7 @@ void AEnemyCharacter::AttackTarget(AActor* Target)
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
 		UGameplayStatics::ApplyDamage(HittedActor, AIDamage, OwnerController, this, UDamageType::StaticClass());
-		UE_LOG(LogTemp,Display,TEXT("AI 攻击了 %s"),*HittedActor->GetName())
+		UE_LOG(LogTemp, Display, TEXT("AI 攻击了 %s"), *HittedActor->GetName());
 	}
 }
 
