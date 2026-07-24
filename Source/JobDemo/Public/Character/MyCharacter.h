@@ -62,6 +62,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UHealthComponent>HealthComponent;
+
+	UFUNCTION()
+	void HandleDeath();
 protected:
 
 	void CheckInteract();

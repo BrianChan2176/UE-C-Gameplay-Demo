@@ -10,7 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "Components/HealthComponent.h"
-
+#include "Core/MyPlayerController.h"
+#include "Components/CapsuleComponent.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -46,7 +47,43 @@ void AMyCharacter::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
 
-	
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this,&AMyCharacter::HandleDeath);
+	}
+}
+
+void AMyCharacter::HandleDeath()
+{
+	// 停止交互检测
+	GetWorldTimerManager().ClearTimer(CheckInteractTimer);
+	if (InteractPromptWidget)
+	{
+		InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+	// 停止玩家移动
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	// 禁止移动和转动镜头
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreMoveInput(true);
+	}
+	// Capsule不再参与碰撞
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 使用TutorialTPP网格体进入布娃娃
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (MeshComponent && MeshComponent->GetPhysicsAsset())
+	{
+		MeshComponent->SetCollisionProfileName(TEXT("Ragdoll"));
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		MeshComponent->SetSimulatePhysics(true);
+		MeshComponent->WakeAllRigidBodies();
+	}
+	UE_LOG(LogTemp,Display,TEXT("%s Player died"),*GetName());
+
 }
 
 void AMyCharacter::CheckInteract()
@@ -79,7 +116,6 @@ void AMyCharacter::CheckInteract()
 			if (InteractPromptWidget) 
 			{
 				InteractPromptWidget->SetVisibility(ESlateVisibility::Visible);
-			
 			}
 		}
 		else 

@@ -7,7 +7,7 @@
 #include "EnemyCharacter.generated.h"
 
 class UHealthComponent;
-
+class UAnimMontage;
 UCLASS()
 class JOBDEMO_API AEnemyCharacter : public ACharacter
 {
@@ -36,8 +36,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
 	float AIAttackRange = 1000.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
-	float AIDamage = 10.f;
+	float AIDamage = 20.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage>DeathMontage;
 public:	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI Partrol")
 	TArray<AActor*>PatrolPointsArray;

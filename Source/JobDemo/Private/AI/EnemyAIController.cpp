@@ -208,12 +208,11 @@ void AEnemyAIController::UpdateChase()
 	APawn* ControlledPawn = GetPawn();
 	if (!ControlledPawn) { return; }
 	const float TargetDistance = FVector::Dist(ControlledPawn->GetActorLocation(), TargetPlayer->GetActorLocation());
-	if (TargetDistance > AIAttackRange) //如果没进入攻击距离就追击玩家
+	if (TargetDistance > AIAttackRange) //如果没进入攻击距离就只追击玩家
 	{
 		if (GetMoveStatus() != EPathFollowingStatus::Moving) 
 		{
 			MoveToActor(TargetPlayer, ChaseAcceptanceDistance);
-
 		}
 		return;
 	}
@@ -230,7 +229,6 @@ void AEnemyAIController::UpdateChase()
 		GetWorldTimerManager().SetTimer(AttackCoolDownTimerHandle, this, &AEnemyAIController::ResetAttackCoolDown, AttackCoolDown, false);
 	}
 
-
 }
 
 void AEnemyAIController::ResetAttackCoolDown()
@@ -246,4 +244,4 @@ void AEnemyAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-}
+}  
