@@ -55,6 +55,8 @@ void AMyCharacter::BeginPlay()
 
 void AMyCharacter::HandleDeath()
 {
+
+	
 	// 停止交互检测
 	GetWorldTimerManager().ClearTimer(CheckInteractTimer);
 	if (InteractPromptWidget)
@@ -73,6 +75,8 @@ void AMyCharacter::HandleDeath()
 	}
 	// Capsule不再参与碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 	//失去准星
+	PlayerController->HideCrosshair();
 	// 使用TutorialTPP网格体进入布娃娃
 	USkeletalMeshComponent* MeshComponent = GetMesh();
 	if (MeshComponent && MeshComponent->GetPhysicsAsset())
@@ -82,6 +86,7 @@ void AMyCharacter::HandleDeath()
 		MeshComponent->SetSimulatePhysics(true);
 		MeshComponent->WakeAllRigidBodies();
 	}
+
 	UE_LOG(LogTemp,Display,TEXT("%s Player died"),*GetName());
 
 }
@@ -154,6 +159,11 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector)
 {
+	if (!HealthComponent || HealthComponent->IsDead())
+	{
+		return;
+	}
+
 	const FRotator YawRotation = FRotator(0.f, ControlRotation.Yaw, 0.f);
 	const FVector ForwardDirection=FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -174,6 +184,11 @@ bool AMyCharacter::CheckHasDoorKey() const
 
 void AMyCharacter::ShootDamage()
 {
+	if (!HealthComponent || HealthComponent->IsDead())
+	{
+		return;
+	}
+
 	AController* OwnerController=GetController();
 	if (!OwnerController) { return; }
 
@@ -206,6 +221,11 @@ void AMyCharacter::ShootDamage()
 
 void AMyCharacter::TryInteract()
 {
+	if (!HealthComponent || HealthComponent->IsDead())
+	{
+		return;
+	}
+
 	FVector ViewLocation;
 	FRotator ViewRotator;
 	GetController()->GetPlayerViewPoint(ViewLocation, ViewRotator);

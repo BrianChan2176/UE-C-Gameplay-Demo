@@ -9,6 +9,13 @@
 #include "DrawDebugHelpers.h"
 #include "Interaction/Interactable.h"
 #include "Blueprint/UserWidget.h"
+void AMyPlayerController::HideCrosshair()
+{
+	if (CrosshairWidget) 
+	{
+		CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

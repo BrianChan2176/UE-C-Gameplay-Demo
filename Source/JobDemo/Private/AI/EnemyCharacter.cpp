@@ -8,7 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
-#include "Animation/AnimMontage.h"
+
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -70,6 +70,8 @@ void AEnemyCharacter::HandleDeath()
 
 void AEnemyCharacter::AttackTarget(AActor* Target)
 {
+	if (!Target) { return; }
+
 	AController* OwnerController = GetController();
 	if (!OwnerController) { return; }
 

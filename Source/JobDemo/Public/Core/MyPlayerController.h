@@ -16,7 +16,8 @@ class JOBDEMO_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 public:
-
+	UFUNCTION()
+	void HideCrosshair();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -43,6 +44,8 @@ protected:
 	TSubclassOf<UUserWidget>CrosshairWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UUserWidget>CrosshairWidget;
+
+	
 protected:
 	virtual void BeginPlay()override;
 
