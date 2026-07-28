@@ -9,7 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UUserWidget;
-
+class UPlayerHealthWidget;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -18,6 +18,9 @@ class JOBDEMO_API AMyPlayerController : public APlayerController
 public:
 	UFUNCTION()
 	void HideCrosshair();
+
+	UFUNCTION()
+	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -45,6 +48,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UUserWidget>CrosshairWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	TSubclassOf<UPlayerHealthWidget>HealthWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UPlayerHealthWidget>HealthWidget;
 	
 protected:
 	virtual void BeginPlay()override;

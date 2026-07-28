@@ -9,11 +9,19 @@
 #include "DrawDebugHelpers.h"
 #include "Interaction/Interactable.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/PlayerHealthWidget.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
 	{
 		CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+void AMyPlayerController::UpdateHealthBar(float CurrentHealth, float MaxHealth)
+{
+	if (HealthWidget)
+	{
+		HealthWidget->SetHealth(CurrentHealth, MaxHealth);
 	}
 }
 void AMyPlayerController::BeginPlay()
@@ -39,6 +47,16 @@ void AMyPlayerController::BeginPlay()
 		if (CrosshairWidget)
 		{
 			CrosshairWidget->AddToViewport();
+		}
+	}
+
+	if (HealthWidgetClass) 
+	{
+		HealthWidget = CreateWidget<UPlayerHealthWidget>(this, HealthWidgetClass);
+		if (HealthWidget)
+		{
+			HealthWidget->AddToViewport();
+			HealthWidget->SetHealth(1.f, 1.f);
 		}
 	}
 }

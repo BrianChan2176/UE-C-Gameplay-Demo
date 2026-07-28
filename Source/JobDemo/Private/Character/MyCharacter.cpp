@@ -49,14 +49,13 @@ void AMyCharacter::BeginPlay()
 
 	if (HealthComponent)
 	{
+		HealthComponent->OnHealthChanged.AddDynamic(this,&AMyCharacter::HandleHealthChange);
 		HealthComponent->OnDeath.AddDynamic(this,&AMyCharacter::HandleDeath);
 	}
 }
 
 void AMyCharacter::HandleDeath()
 {
-
-	
 	// 停止交互检测
 	GetWorldTimerManager().ClearTimer(CheckInteractTimer);
 	if (InteractPromptWidget)
@@ -72,11 +71,12 @@ void AMyCharacter::HandleDeath()
 	{
 		PlayerController->SetIgnoreLookInput(true);
 		PlayerController->SetIgnoreMoveInput(true);
+		// 	//失去准星
+		PlayerController->HideCrosshair();
 	}
 	// Capsule不再参与碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	// 	//失去准星
-	PlayerController->HideCrosshair();
+
 	// 使用TutorialTPP网格体进入布娃娃
 	USkeletalMeshComponent* MeshComponent = GetMesh();
 	if (MeshComponent && MeshComponent->GetPhysicsAsset())
@@ -89,6 +89,15 @@ void AMyCharacter::HandleDeath()
 
 	UE_LOG(LogTemp,Display,TEXT("%s Player died"),*GetName());
 
+}
+
+void AMyCharacter::HandleHealthChange(float CurrentHealth, float MaxHealth)
+{
+	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->UpdateHealthBar(CurrentHealth, MaxHealth);
+	}
 }
 
 void AMyCharacter::CheckInteract()

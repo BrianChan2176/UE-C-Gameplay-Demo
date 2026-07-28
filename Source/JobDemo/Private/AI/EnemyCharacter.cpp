@@ -64,7 +64,7 @@ void AEnemyCharacter::HandleDeath()
 	}
 	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"),*GetName()); }
 
-	float DestroyDelay = 0.4f;
+	float DestroyDelay = 3.f;
 	SetLifeSpan(DestroyDelay);
 }
 

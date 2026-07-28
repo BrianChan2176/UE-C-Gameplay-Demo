@@ -65,6 +65,9 @@ protected:
 
 	UFUNCTION()
 	void HandleDeath();
+
+	UFUNCTION()
+	void HandleHealthChange(float CurrentHealth,float MaxHealth);
 protected:
 
 	void CheckInteract();
