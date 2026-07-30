@@ -8,7 +8,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
-
+#include "Core/MyGameModeBase.h"
+#include "Engine/World.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -65,6 +66,13 @@ void AEnemyCharacter::HandleDeath()
 	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"),*GetName()); }
 
 	float DestroyDelay = 3.f;
+	//通知GameMode有敌人死亡
+	AMyGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AMyGameModeBase>();
+	if (GameMode)
+	{
+		GameMode->NotifyEnemyDied();
+	}
+
 	SetLifeSpan(DestroyDelay);
 }
 

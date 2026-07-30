@@ -106,8 +106,10 @@ void AMyCharacter::CheckInteract()
 {
 	FVector ViewLocation;
 	FRotator ViewRotator;
-	GetController()->GetPlayerViewPoint(ViewLocation, ViewRotator);
+	AController* OwnerController = GetController();
+	if (!OwnerController) { return; }
 
+	OwnerController->GetPlayerViewPoint(ViewLocation, ViewRotator);
 	FVector Start = ViewLocation;
 
 	FVector ForwardDirection = ViewRotator.Vector();
@@ -237,9 +239,12 @@ void AMyCharacter::TryInteract()
 		return;
 	}
 
+	AController* OwnerController = GetController();
+	if (!OwnerController) { return; }
+
 	FVector ViewLocation;
 	FRotator ViewRotator;
-	GetController()->GetPlayerViewPoint(ViewLocation, ViewRotator);
+	OwnerController->GetPlayerViewPoint(ViewLocation, ViewRotator);
 
 	FVector Start = ViewLocation;
 
@@ -263,3 +268,4 @@ void AMyCharacter::TryInteract()
 		}
 	}
 }
+

@@ -11,6 +11,7 @@ class UInputAction;
 class UUserWidget;
 class UPlayerHealthWidget;
 class URestartWidget;
+class UVictoryWidget;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -25,6 +26,8 @@ public:
 
 
 	void ShowRestartWidget();
+
+	void Victory();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -62,7 +65,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<URestartWidget>RestartWidget;
 
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UVictoryWidget>VictoryWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UVictoryWidget>VictoryWidget;
 protected:
 	virtual void BeginPlay()override;
 

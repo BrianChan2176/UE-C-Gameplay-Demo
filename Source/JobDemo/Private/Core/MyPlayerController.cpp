@@ -11,6 +11,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/PlayerHealthWidget.h"
 #include "UI/RestartWidget.h"
+#include "UI/VictoryWidget.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -182,4 +183,21 @@ void AMyPlayerController::Shoot(const FInputActionValue& Value)
 	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->ShootDamage();
+}
+
+void AMyPlayerController::Victory()
+{
+	ShowRestartWidget();
+	if (VictoryWidgetClass)
+	{
+		VictoryWidget = CreateWidget<UVictoryWidget>(this, VictoryWidgetClass);
+		if (VictoryWidget)
+		{
+			VictoryWidget->AddToViewport(1000);
+			HideCrosshair();
+			SetIgnoreMoveInput(true);
+			SetIgnoreLookInput(true);
+			bShowMouseCursor = true;
+		}
+	}
 }
