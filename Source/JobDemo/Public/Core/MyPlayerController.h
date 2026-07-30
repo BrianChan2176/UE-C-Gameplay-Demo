@@ -10,6 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 class UUserWidget;
 class UPlayerHealthWidget;
+class URestartWidget;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -21,6 +22,9 @@ public:
 
 	UFUNCTION()
 	void UpdateHealthBar(float CurrentHealth, float MaxHealth);
+
+
+	void ShowRestartWidget();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -53,6 +57,12 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPlayerHealthWidget>HealthWidget;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<URestartWidget>RestartWidgetClass;
+	UPROPERTY()
+	TObjectPtr<URestartWidget>RestartWidget;
+
+
 protected:
 	virtual void BeginPlay()override;
 

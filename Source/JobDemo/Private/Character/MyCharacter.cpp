@@ -71,8 +71,10 @@ void AMyCharacter::HandleDeath()
 	{
 		PlayerController->SetIgnoreLookInput(true);
 		PlayerController->SetIgnoreMoveInput(true);
-		// 	//失去准星
+		// 失去准星
 		PlayerController->HideCrosshair();
+		//显示重新开始widget
+		PlayerController->ShowRestartWidget();
 	}
 	// Capsule不再参与碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

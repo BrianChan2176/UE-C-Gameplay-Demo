@@ -10,6 +10,7 @@
 #include "Interaction/Interactable.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/PlayerHealthWidget.h"
+#include "UI/RestartWidget.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -17,6 +18,7 @@ void AMyPlayerController::HideCrosshair()
 		CrosshairWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
 void AMyPlayerController::UpdateHealthBar(float CurrentHealth, float MaxHealth)
 {
 	if (HealthWidget)
@@ -24,6 +26,20 @@ void AMyPlayerController::UpdateHealthBar(float CurrentHealth, float MaxHealth)
 		HealthWidget->SetHealth(CurrentHealth, MaxHealth);
 	}
 }
+
+void AMyPlayerController::ShowRestartWidget()
+{
+	if (RestartWidgetClass)
+	{
+		RestartWidget = CreateWidget<URestartWidget>(this, RestartWidgetClass);
+		if (!RestartWidget) { return; }
+
+		RestartWidget->AddToViewport();
+		bShowMouseCursor = true;
+		
+	}
+}
+
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -59,6 +75,8 @@ void AMyPlayerController::BeginPlay()
 			HealthWidget->SetHealth(1.f, 1.f);
 		}
 	}
+
+
 }
 
 void AMyPlayerController::SetupInputComponent()
