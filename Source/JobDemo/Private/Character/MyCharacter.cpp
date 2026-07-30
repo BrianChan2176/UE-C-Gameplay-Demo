@@ -220,10 +220,14 @@ void AMyCharacter::ShootDamage()
 	Params.AddIgnoredActor(this);
 
 	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	#if !UE_BUILD_SHIPPING
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
+	#endif
 	if (bHitted)
 	{
+		#if !UE_BUILD_SHIPPING
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
+		#endif
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
 		UGameplayStatics::ApplyDamage(HittedActor, Damage, OwnerController, this, UDamageType::StaticClass());
@@ -257,10 +261,14 @@ void AMyCharacter::TryInteract()
 	Params.AddIgnoredActor(this);
 
 	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	#if !UE_BUILD_SHIPPING
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f, 0, 2.f);
+	#endif
 	if (bHitted)
 	{
+		#if !UE_BUILD_SHIPPING
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
+		#endif
 		AActor* HittedActor = HitResult.GetActor();
 		if (HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
 		{

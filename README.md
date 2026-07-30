@@ -7,6 +7,9 @@
 
 核心玩法逻辑由 C++ 实现，Blueprint 主要用于资源配置、角色外观和 UMG 界面布局。
 
+## Download
+[下载Windows Shipping版本](https://pan.baidu.com/s/1dhcOkApwECpsFNfsz6ivVQ?pwd=1234)
+
 ## Gameplay Loop
 
 玩家移动与探索
@@ -92,10 +95,8 @@ Windows Development打包版本测试：
 - Visual Studio
 - Windows
 
-## Demo Video
 
-演示视频制作中。
 
 ## Status
-
 当前已经完成基础可玩闭环，后续工作主要为作品展示、打包和工程化补充。
+![Gameplay](Docs/Images/gameplay.png)
