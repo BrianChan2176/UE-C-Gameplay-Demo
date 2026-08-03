@@ -230,10 +230,10 @@ void AMyCharacter::ShootDamage()
 
 }
 
-void AMyCharacter::ServerShoot_Implementation(FVector ClientTraceStart, FVector ClientDirenction)//服务器先判断client射击合法性，之后才权威射击
+void AMyCharacter::ServerShoot_Implementation(FVector ClientTraceStart, FVector ClientDirection)//服务器先判断client射击合法性，之后才权威射击
 {
 	if (!HealthComponent || HealthComponent->IsDead()) { return; }
-	if (ClientTraceStart.IsNearlyZero() || ClientDirenction.IsNearlyZero()) { return; }
+	if (ClientDirection.IsNearlyZero()) { return; }
 
 	//先判断客户端传过来射线的开始是不是在服务器角色附近，防止客户端作弊射线在不合理的地方开始打出
 	const float MaxTraceStartOffSet = 600.f;
@@ -247,19 +247,20 @@ void AMyCharacter::ServerShoot_Implementation(FVector ClientTraceStart, FVector 
 
 	//客户端的射线开始在服务器误差范围内，可以打射线
 	UE_LOG(LogTemp, Display, TEXT("客户端射击合法，服务器权威射击"));
-	PerformShoot(ClientTraceStart, ClientDirenction);
+	const FVector SafeDirection = ClientDirection.GetSafeNormal();   // 保留方向，强制把长度变成1
+	PerformShoot(ClientTraceStart, SafeDirection);
 }
 
-void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirenction)//服务器权威射击
+void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirection)//服务器权威射击
 {
 	if (!HasAuthority()) { return; }//只能在服务器调用，限制客户端调用
 	if (!HealthComponent || HealthComponent->IsDead()){return;}
-	if (ClientTraceStart.IsNearlyZero() || ClientDirenction.IsNearlyZero()) { return; }
+	if (ClientDirection.IsNearlyZero()) { return; }
 
 	AController* OwnerController=GetController();
 	if (!OwnerController) {  return; }
-
-	FVector End = ClientTraceStart + ClientDirenction * ShootRange;
+	const FVector SafeDirection = ClientDirection.GetSafeNormal();   // 保留方向，强制把长度变成1
+	FVector End = ClientTraceStart + SafeDirection * ShootRange;
 
 	FHitResult HitResult;
 

@@ -44,6 +44,7 @@ void AMyPlayerController::ShowRestartWidget()
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!IsLocalController()){return;}
 
 	ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(GetLocalPlayer());
 	if (LocalPlayer)

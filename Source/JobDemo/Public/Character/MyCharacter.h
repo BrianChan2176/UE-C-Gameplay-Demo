@@ -42,9 +42,9 @@ public:
 protected:
 	// 改成网络请求
 	UFUNCTION(Server, Reliable)
-	void ServerShoot(FVector ClientTraceStart,FVector ClientDirenction);//客户端发送请求，服务器执行 请求_Implementation 判断合法性
+	void ServerShoot(FVector ClientTraceStart,FVector ClientDirection);//客户端发送请求，服务器执行 请求_Implementation 判断合法性
 
-	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirenction);//服务器权威射击
+	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirection);//服务器权威射击
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
