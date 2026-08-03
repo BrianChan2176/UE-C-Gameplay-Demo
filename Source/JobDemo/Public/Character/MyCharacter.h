@@ -34,9 +34,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DoorKey")
 	bool CheckHasDoorKey()const;
 
+	//改成网络请求
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ShootDamage();
+	void ShootDamage();//客户端本地射击意图
+
+
 protected:
+	// 改成网络请求
+	UFUNCTION(Server, Reliable)
+	void ServerShoot(FVector ClientTraceStart,FVector ClientDirenction);//客户端发送请求，服务器执行 请求_Implementation 判断合法性
+
+	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirenction);//服务器权威射击
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

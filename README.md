@@ -8,7 +8,7 @@
 核心玩法逻辑由 C++ 实现，Blueprint 主要用于资源配置、角色外观和 UMG 界面布局。
 
 ## Download
-[下载Windows Shipping版本](https://pan.baidu.com/s/1dhcOkApwECpsFNfsz6ivVQ?pwd=1234)
+[下载Windows版本](https://pan.baidu.com/s/1dhcOkApwECpsFNfsz6ivVQ?pwd=1234)
 
 ## Gameplay Loop
 
