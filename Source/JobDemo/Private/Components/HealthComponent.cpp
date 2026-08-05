@@ -3,13 +3,14 @@
 
 #include "Components/HealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
+	SetIsReplicatedByDefault(true);
 	// ...
 }
 
@@ -18,16 +19,25 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentHealth = MaxHealth;
 
-	if (AActor* Owner = GetOwner())
+	AActor* Owner = GetOwner();
+	if (!Owner) { return; }
+
+	if (Owner->HasAuthority()) 
 	{
+		CurrentHealth = MaxHealth;
 		Owner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::HandleTakeAnyDamage);
-
 	}
 	
 }
 
+
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+}
 
 void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,
 	float Damage,
@@ -35,6 +45,11 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,
 	AController* InstigatedBy,
 	AActor* DamageCasuer)
 {
+
+	AActor* Owner = GetOwner();
+	if (!Owner || !Owner->HasAuthority()){return;}
+
+
 	if(Damage <= 0.f || bIsDead){return;}
 
 	CurrentHealth = FMath::Clamp((CurrentHealth- Damage), 0.f, MaxHealth);
@@ -49,5 +64,11 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,
 		UE_LOG(LogTemp, Display, TEXT("%s is Dead"), *GetNameSafe(DamagedActor));
 	}
 
+}
+
+void UHealthComponent::OnRep_CurrentHealth()
+{
+	UE_LOG(LogTemp,Warning,TEXT("客户端收到生命值：%s HP = %f / %f"),*GetNameSafe(GetOwner()),CurrentHealth,MaxHealth);
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 

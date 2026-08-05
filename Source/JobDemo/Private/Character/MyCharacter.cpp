@@ -51,7 +51,10 @@ void AMyCharacter::BeginPlay()
 		}
 	}
 
-	GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
+	if (IsLocallyControlled())
+	{
+		GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
+	}
 
 	if (HealthComponent)
 	{
