@@ -37,6 +37,14 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+	DOREPLIFETIME(UHealthComponent, bIsDead);
+}
+
+void UHealthComponent::OnRep_Dead()
+{
+	if (!bIsDead){return;}
+	UE_LOG(LogTemp, Warning, TEXT("客户端收到死亡 bIsDead=%s"), bIsDead?TEXT("true"):TEXT("false"));
+	OnDeath.Broadcast();
 }
 
 void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor,

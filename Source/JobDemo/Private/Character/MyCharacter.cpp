@@ -39,20 +39,19 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (InteractPromptWidgetClass)
-	{
-		InteractPromptWidget = CreateWidget<UUserWidget>(GetWorld(), InteractPromptWidgetClass);
-		if (InteractPromptWidget)
-		{
-			InteractPromptWidget->AddToViewport(9999);
-			InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
-			
-		}
-	}
-
 	if (IsLocallyControlled())
 	{
+		if (InteractPromptWidgetClass)
+		{
+			InteractPromptWidget = CreateWidget<UUserWidget>(GetWorld(), InteractPromptWidgetClass);
+			if (InteractPromptWidget)
+			{
+				InteractPromptWidget->AddToViewport(9999);
+				InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
+			
+			}
+		}
+
 		GetWorldTimerManager().SetTimer(CheckInteractTimer, this, &AMyCharacter::CheckInteract, 0.3f, true);
 	}
 
@@ -76,16 +75,20 @@ void AMyCharacter::HandleDeath()
 	// 停止玩家移动
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
-	// 禁止移动和转动镜头
-	AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
-	if (PlayerController)
+	
+	if (IsLocallyControlled()) //死亡客户端的本地操作：禁用摄像机和输入，显示死亡UI
 	{
-		PlayerController->SetIgnoreLookInput(true);
-		PlayerController->SetIgnoreMoveInput(true);
-		// 失去准星
-		PlayerController->HideCrosshair();
-		//显示重新开始widget
-		PlayerController->ShowRestartWidget();
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(GetController());
+		if (PlayerController)
+		{
+			// 禁止移动和转动镜头
+			PlayerController->SetIgnoreLookInput(true);
+			PlayerController->SetIgnoreMoveInput(true);
+			// 失去准星
+			PlayerController->HideCrosshair();
+			//显示重新开始widget
+			PlayerController->ShowRestartWidget();
+		}
 	}
 	// Capsule不再参与碰撞
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -101,6 +104,7 @@ void AMyCharacter::HandleDeath()
 	}
 
 	UE_LOG(LogTemp,Display,TEXT("%s Player died"),*GetName());
+
 
 }
 

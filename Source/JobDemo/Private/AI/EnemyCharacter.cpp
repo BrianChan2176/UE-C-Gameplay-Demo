@@ -67,17 +67,19 @@ void AEnemyCharacter::HandleDeath()
 		MeshComponent->SetSimulatePhysics(true);//让身体骨骼网格开始进行物理模拟。
 		MeshComponent->WakeAllRigidBodies();//让所有骨骼刚体立即活动
 	}
-	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"),*GetName()); }
+	else { UE_LOG(LogTemp, Display, TEXT("%s Has no SkeletalMesh Asset"), *GetName()); }
 
 	float DestroyDelay = 3.f;
 	//通知GameMode有敌人死亡
-	AMyGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AMyGameModeBase>();
-	if (GameMode)
+	if (HasAuthority())
 	{
-		GameMode->NotifyEnemyDied();
+		AMyGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AMyGameModeBase>();
+		if (GameMode)
+		{
+			GameMode->NotifyEnemyDied();
+		}
+		SetLifeSpan(DestroyDelay);
 	}
-
-	SetLifeSpan(DestroyDelay);
 }
 
 void AEnemyCharacter::AttackTarget(AActor* Target)

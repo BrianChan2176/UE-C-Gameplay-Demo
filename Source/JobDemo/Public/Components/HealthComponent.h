@@ -42,10 +42,12 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "HealthComponent", ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth = 100.f;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "HealthComponent")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "HealthComponent", ReplicatedUsing = OnRep_Dead)
 	bool bIsDead = false;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;//网络复制规则清单
+
+	
 private:
 	UFUNCTION()
 	void HandleTakeAnyDamage(AActor* DamagedActor,
@@ -56,4 +58,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_CurrentHealth();
+
+	UFUNCTION()
+	void OnRep_Dead();
 };
