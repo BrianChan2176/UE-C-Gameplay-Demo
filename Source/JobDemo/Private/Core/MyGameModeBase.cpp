@@ -15,11 +15,19 @@ void AMyGameModeBase::NotifyEnemyDied()
 	if (RemainingEnemies <= 0)
 	{
 		bGameFinished = true;
-		AMyPlayerController* PlayerController=Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-		if (PlayerController)
+
+		//服务器GameMODE用World里的PlayerController迭代器遍历所有PlayerController调用Client RPC命令，每个客户端显示胜利UI
+		FConstPlayerControllerIterator PlayerControllerIT = GetWorld()->GetPlayerControllerIterator();
+		for (PlayerControllerIT;PlayerControllerIT;++PlayerControllerIT)
 		{
-			PlayerController->Victory();
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerControllerIT->Get());
+			if (PlayerController) 
+			{ 
+				PlayerController->ClientVictory(); 
+			}
 		}
+
+		
 	}
 }
 

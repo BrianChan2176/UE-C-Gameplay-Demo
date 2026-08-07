@@ -28,6 +28,9 @@ public:
 	void ShowRestartWidget();
 
 	void Victory();
+
+	UFUNCTION(Client, Reliable)
+	void ClientVictory();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -77,7 +80,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void TryInteract();
 
-
+	
 private:
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);

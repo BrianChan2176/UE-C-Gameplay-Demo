@@ -128,6 +128,12 @@ void AMyPlayerController::TryInteract()
 	ControllCharacter->TryInteract();
 }
 
+void AMyPlayerController::ClientVictory_Implementation()
+{
+	if (!IsLocalController()) { return; }
+	Victory();
+}
+
 void AMyPlayerController::Move(const FInputActionValue& Value)
 {
 	FVector2D MoveVector = Value.Get<FVector2D>();
@@ -188,7 +194,7 @@ void AMyPlayerController::Shoot(const FInputActionValue& Value)
 
 void AMyPlayerController::Victory()
 {
-	ShowRestartWidget();
+	//ShowRestartWidget();//单机重开
 	if (VictoryWidgetClass)
 	{
 		VictoryWidget = CreateWidget<UVictoryWidget>(this, VictoryWidgetClass);
