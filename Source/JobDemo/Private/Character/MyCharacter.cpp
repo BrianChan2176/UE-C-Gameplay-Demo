@@ -275,19 +275,29 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	Params.AddIgnoredActor(this);
 
 	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, ClientTraceStart, End, ECC_Visibility, Params);
-	#if !UE_BUILD_SHIPPING
-	DrawDebugLine(GetWorld(), ClientTraceStart, End, FColor::Red, false, 2.f, 0, 2.f);
-	#endif
+
+	const FVector ImpactPoint = bHitted ? HitResult.ImpactPoint : End;//射线效果如果命中记录和只射线到命中点，没命中打完射线
+	MulticastPlayShootEffects(ClientTraceStart, ImpactPoint, bHitted);
+
 	if (bHitted)
 	{
-		#if !UE_BUILD_SHIPPING
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Green, false, 2.0f);
-		#endif
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
 		UGameplayStatics::ApplyDamage(HittedActor, Damage, OwnerController, this, UDamageType::StaticClass());
 		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s 造成了 %f 伤害"),*HittedActor->GetName(), Damage);
 	}
+}
+
+void AMyCharacter::MulticastPlayShootEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHitted)//同步服务器+所有客户端射线效果
+{
+#if !UE_BUILD_SHIPPING
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 2.f, 0, 2.f);
+	if (bHitted)
+	{
+		DrawDebugSphere(GetWorld(), TraceEnd, 10.0f, 12, FColor::Green, false, 2.0f);
+		UE_LOG(LogTemp, Display, TEXT("bHitted:%d"), bHitted);
+	}
+#endif
 }
 
 

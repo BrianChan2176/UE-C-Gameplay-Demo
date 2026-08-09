@@ -46,6 +46,9 @@ protected:
 
 	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirection);//服务器权威射击
 
+	UFUNCTION(NetMulticast,Unreliable)
+	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
