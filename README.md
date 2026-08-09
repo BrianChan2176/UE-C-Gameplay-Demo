@@ -57,6 +57,7 @@
 - 使用`IsLocallyControlled()`区分本地玩家UI、输入和摄像机逻辑
 - 使用`Client RPC`向每个客户端发送胜利通知
 - GameMode通过PlayerController迭代器遍历在线玩家并触发客户端胜利UI
+- NetMulticast同步所有客户端射击效果
 
 ## Core Architecture
 

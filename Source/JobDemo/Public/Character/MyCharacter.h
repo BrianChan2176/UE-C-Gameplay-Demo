@@ -39,6 +39,7 @@ public:
 	void ShootDamage();//客户端本地射击意图
 
 
+	void SetSprint(bool IsSprinting);//本体客户端奔跑意图
 protected:
 	// 改成网络请求
 	UFUNCTION(Server, Reliable)
@@ -48,6 +49,11 @@ protected:
 
 	UFUNCTION(NetMulticast,Unreliable)
 	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted);
+
+	UFUNCTION(Server,Reliable)
+	void ServerSprint(bool IsSprinting);//发送奔跑请求
+
+	void ChangeMovementSpeed(bool IsSprinting);//服务器权威改变角色移动速度
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

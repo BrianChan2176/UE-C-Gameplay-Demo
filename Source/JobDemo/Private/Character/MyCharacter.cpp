@@ -35,6 +35,10 @@ AMyCharacter::AMyCharacter()
 
 
 
+
+
+
+
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
@@ -236,6 +240,31 @@ void AMyCharacter::ShootDamage()
 	}
 
 }
+
+void AMyCharacter::SetSprint(bool IsSprinting)
+{
+	
+	ChangeMovementSpeed(IsSprinting);//客户端先本地预测改变移速，保证响应速度
+
+	if (!HasAuthority()) 
+	{
+		ServerSprint(IsSprinting);//服务器再修改和验证移速
+	}
+
+}
+
+void AMyCharacter::ServerSprint_Implementation(bool IsSprinting)
+{
+	ChangeMovementSpeed(IsSprinting);
+}
+
+void AMyCharacter::ChangeMovementSpeed(bool IsSprinting)
+{
+	MovementSpeed = IsSprinting ? 1200.f : 400.f;
+	GetCharacterMovement()->MaxWalkSpeed=MovementSpeed;
+}
+
+
 
 void AMyCharacter::ServerShoot_Implementation(FVector ClientTraceStart, FVector ClientDirection)//服务器先判断client射击合法性，之后才权威射击
 {
