@@ -5,6 +5,11 @@
 #include "Kismet/Gameplaystatics.h"
 #include "AI/EnemyCharacter.h"
 #include "Core/MyPlayerController.h"
+#include "Core/MyGameStateBase.h"
+AMyGameModeBase::AMyGameModeBase()
+{
+	GameStateClass = AMyGameStateBase::StaticClass();
+}
 void AMyGameModeBase::NotifyEnemyDied()
 {
 	if (bGameFinished) { return; }

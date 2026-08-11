@@ -26,13 +26,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void TryInteract();
+	UFUNCTION(Server,Reliable)
+	void ServerInteract(AActor* Interactor);//客户端发送网络请求
+
+	void PerformInteract(AActor* Interactor);//服务器权威交互
+
 
 	void MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector);
 
-	UFUNCTION(BlueprintCallable, Category = "DoorKey")
-	void TookDoorKey();
-	UFUNCTION(BlueprintCallable, Category = "DoorKey")
-	bool CheckHasDoorKey()const;
 
 	//改成网络请求
 	UFUNCTION(BlueprintCallable, Category = "Combat")
@@ -73,8 +74,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AActor>CurrentInteractable;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorKey")
-	bool bHasDoorKey = false;
+
 
 	FTimerHandle CheckInteractTimer;
 
@@ -86,9 +86,9 @@ protected:
 
 	UFUNCTION()
 	void HandleHealthChange(float CurrentHealth,float MaxHealth);
-protected:
 
 	void CheckInteract();
+
 public:	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")

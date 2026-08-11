@@ -12,6 +12,7 @@
 #include "Components/HealthComponent.h"
 #include "Core/MyPlayerController.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -175,6 +176,7 @@ void AMyCharacter::CheckInteract()
 }
 
 
+
 // Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
@@ -188,6 +190,8 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+
 
 void AMyCharacter::MoveByInput(const FRotator& ControlRotation, const FVector2D& MoveVector)
 {
@@ -204,15 +208,6 @@ void AMyCharacter::MoveByInput(const FRotator& ControlRotation, const FVector2D&
 	AddMovementInput(RightDirection, MoveVector.X);
 }
 
-void AMyCharacter::TookDoorKey()
-{
-	bHasDoorKey = true;
-}
-
-bool AMyCharacter::CheckHasDoorKey() const
-{
-	return bHasDoorKey;
-}
 
 void AMyCharacter::ShootDamage()
 {
@@ -332,6 +327,7 @@ void AMyCharacter::MulticastPlayShootEffects_Implementation(FVector TraceStart, 
 
 void AMyCharacter::TryInteract()
 {
+	
 	if (!HealthComponent || HealthComponent->IsDead())
 	{
 		return;
@@ -366,8 +362,30 @@ void AMyCharacter::TryInteract()
 		AActor* HittedActor = HitResult.GetActor();
 		if (HittedActor->GetClass()->ImplementsInterface(UInteractable::StaticClass()))
 		{
-			IInteractable::Execute_Interact(HittedActor, this);
+			if (HasAuthority())
+			{
+				PerformInteract(HittedActor);
+			}
+			else 
+			{
+				ServerInteract(HittedActor);
+			}
 		}
 	}
+}
+
+void AMyCharacter::ServerInteract_Implementation(AActor* Interactor)
+{
+	//服务器检查合法性先不写
+	PerformInteract(Interactor);
+}
+
+void AMyCharacter::PerformInteract(AActor* Interactor)
+{
+	if (!HasAuthority()) { return; }
+	if (!Interactor) { return; }
+	if (!HealthComponent || HealthComponent->IsDead()) { return; }
+	if (!Interactor->GetClass()->ImplementsInterface(UInteractable::StaticClass())){return;}
+	IInteractable::Execute_Interact(Interactor, this);
 }
 

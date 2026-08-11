@@ -13,6 +13,7 @@ class JOBDEMO_API AMyGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	AMyGameModeBase();
 	virtual void NotifyEnemyDied();
 protected:
 	virtual void BeginPlay()override;
