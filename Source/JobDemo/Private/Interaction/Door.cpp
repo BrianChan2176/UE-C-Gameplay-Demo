@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Character/MyCharacter.h"
 #include "Core/MyGameStateBase.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 ADoor::ADoor()
 {
@@ -21,10 +22,15 @@ ADoor::ADoor()
 
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
 	DoorMesh->SetupAttachment(PivotPoint);
+
+	bReplicates = true;
+	PivotPoint->SetIsReplicated(true);
 }
 
 void ADoor::Interact_Implementation(AActor* Interactor)
 {
+	if (!HasAuthority()) { return; }
+	//服务器判断合法性有没有钥匙
 	AMyCharacter* Character = Cast<AMyCharacter>(Interactor);
 	if (Character)
 	{
@@ -43,7 +49,11 @@ void ADoor::Interact_Implementation(AActor* Interactor)
 		PivotPoint->AddWorldRotation(FRotator(0.f, 90.f, 0.f));
 		bIsOpen = true;
 	}
-	else { PivotPoint->AddWorldRotation(FRotator(0.f, -90.f, 0.f)); 		bIsOpen = false;}
+	else 
+	{
+		PivotPoint->AddWorldRotation(FRotator(0.f, -90.f, 0.f));
+		bIsOpen = false;
+	}
 	
 }
 
@@ -57,6 +67,13 @@ void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADoor, bIsOpen);
+	DOREPLIFETIME(ADoor, PivotPoint);
 }
 
 // Called every frame

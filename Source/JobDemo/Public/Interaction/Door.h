@@ -35,13 +35,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "DoorComponent")
 	TObjectPtr<USceneComponent>Root;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorComponent")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DoorComponent",Replicated)
 	TObjectPtr<USceneComponent>PivotPoint;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "DoorComponent")
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "DoorComponent",Replicated)
 	bool bIsOpen = false;
 
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:	
 
 

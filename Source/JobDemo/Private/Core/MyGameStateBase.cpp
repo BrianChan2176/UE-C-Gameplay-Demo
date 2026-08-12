@@ -11,5 +11,6 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void AMyGameStateBase::TeamHasDoorKey()
 {
+	if (!HasAuthority()) { return; }
 	bTeamHasDoorKey = true;
 }
