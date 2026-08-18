@@ -8,6 +8,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/MyCharacter.h"
 
 AEnemyAIController::AEnemyAIController()
 {
@@ -141,11 +142,10 @@ void AEnemyAIController::GoToNextPatrolPoint()
 
 void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimulus Stimulus)
 {
-	APawn* PlayerPawn=UGameplayStatics::GetPlayerPawn(this, 0);
-	if (Target != PlayerPawn)
-	{
-		return;
-	}
+
+	AMyCharacter* Player = Cast<AMyCharacter>(Target);
+	if (!Player) { return; }
+
 	if (Stimulus.WasSuccessfullySensed()) 
 	{
 		UE_LOG(LogTemp, Display, TEXT("AI成功感知到玩家"));
