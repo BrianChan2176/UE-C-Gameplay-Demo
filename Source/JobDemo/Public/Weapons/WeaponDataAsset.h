@@ -30,4 +30,6 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Ammo",meta = (ClampMin = "0.0"))
     float ReloadDuration = 1.5f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+    TObjectPtr<UStaticMesh>GunMesh;
 };

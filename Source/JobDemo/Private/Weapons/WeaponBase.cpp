@@ -3,12 +3,22 @@
 
 #include "Weapons/WeaponBase.h"
 #include "Weapons/WeaponDataAsset.h"
+#include "Components/StaticMeshComponent.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 
+	SetRootComponent(StaticMeshComponent);
+
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	StaticMeshComponent->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -18,24 +28,25 @@ void AWeaponBase::BeginPlay()
 	
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("没有武器数据配置"));
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
 		return;
 	}
 
 	ApplyWeaponData();
+
 }
 
 void AWeaponBase::ApplyWeaponData()
 {
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("没有武器数据配置"));
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
 		return;
 	}
 
 	CurrentAmmo = WeaponData->MagazineSize;
-
-	UE_LOG(LogTemp, Display, TEXT("武器数据初始化成功"));
+	StaticMeshComponent->SetStaticMesh(WeaponData->GunMesh);
+	UE_LOG(LogTemp, Display, TEXT("%s武器数据初始化成功"), *WeaponData->GunName.ToString());
 }
 
 bool AWeaponBase::CanShoot() const
@@ -49,15 +60,27 @@ bool AWeaponBase::CanShoot() const
 
 void AWeaponBase::Fire()
 {
+	if (!WeaponData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
+		return;
+	}
+
 	if (!CanShoot())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("武器当前不能射击"));
+		UE_LOG(LogTemp, Warning, TEXT("%s当前不能射击"),*WeaponData->GunName.ToString());
 		return;
 	}
 
 	CurrentAmmo = CurrentAmmo - 1;
 
-	UE_LOG(LogTemp, Warning, TEXT("武器射击成功，剩下弹药：%d"),CurrentAmmo);
+	UE_LOG(LogTemp, Warning, TEXT("%s射击成功，剩下弹药：%d"), *WeaponData->GunName.ToString(),CurrentAmmo);
+}
+
+void AWeaponBase::Interact_Implementation(AActor* Interactor)
+{
+	if (!Interactor) { return; }
+	UE_LOG(LogTemp, Warning, TEXT("%s可交互"), *WeaponData->GunName.ToString(), CurrentAmmo);
 }
 
 // Called every frame

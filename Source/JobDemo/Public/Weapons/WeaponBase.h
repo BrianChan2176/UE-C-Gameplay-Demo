@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/Interactable.h"
 #include "WeaponBase.generated.h"
 class UWeaponDataAsset;
+class UStaticMeshComponent;
 UCLASS()
-class JOBDEMO_API AWeaponBase : public AActor
+class JOBDEMO_API AWeaponBase : public AActor,public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -36,7 +38,11 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Weapon Data")
 	bool bIsReloading = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Data")
+	TObjectPtr<UStaticMeshComponent>StaticMeshComponent;
 
+
+	virtual void Interact_Implementation(AActor* Interactor)override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
