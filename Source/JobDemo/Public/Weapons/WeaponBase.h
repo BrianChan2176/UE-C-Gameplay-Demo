@@ -41,10 +41,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	TObjectPtr<UStaticMeshComponent>StaticMeshComponent;
 
-
 	virtual void Interact_Implementation(AActor* Interactor)override;
+
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon Component")
+	bool EquitTo(USceneComponent* AttachPoint, APawn* OwnerPawn);
 };

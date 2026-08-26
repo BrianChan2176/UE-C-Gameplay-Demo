@@ -4,6 +4,8 @@
 #include "Weapons/WeaponBase.h"
 #include "Weapons/WeaponDataAsset.h"
 #include "Components/StaticMeshComponent.h"
+#include "Character/MyCharacter.h"
+#include "Weapons/WeaponComponent.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -81,6 +83,45 @@ void AWeaponBase::Interact_Implementation(AActor* Interactor)
 {
 	if (!Interactor) { return; }
 	UE_LOG(LogTemp, Warning, TEXT("%s可交互"), *WeaponData->GunName.ToString(), CurrentAmmo);
+	AMyCharacter* PlayerCharacter=Cast<AMyCharacter>(Interactor);
+	if (!IsValid(PlayerCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("发起交互的不是MyCharacter"));
+		return;
+	}
+	UWeaponComponent* PlayerWeaponComponent=PlayerCharacter->FindComponentByClass<UWeaponComponent>();
+	if (!IsValid(PlayerWeaponComponent))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("没有武器组件"));
+		return;
+	}
+
+	PlayerWeaponComponent->TryPickUpWeapon(this);
+}
+
+bool AWeaponBase::EquitTo(USceneComponent* AttachPoint, APawn* OwnerPawn)
+{
+	if (!IsValid(AttachPoint) || !IsValid(OwnerPawn) || !IsValid(StaticMeshComponent))
+	{
+		return false;
+	}
+
+	StaticMeshComponent->SetSimulatePhysics(false);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	SetOwner(OwnerPawn);
+	const bool bIsAttached=AttachToComponent(AttachPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	SetInstigator(OwnerPawn);
+
+	if (bIsAttached == false) 
+	{
+		SetOwner(nullptr);
+		SetInstigator(nullptr);
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		return false;
+	}
+
+	return true;
 }
 
 // Called every frame

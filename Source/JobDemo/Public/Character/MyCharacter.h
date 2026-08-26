@@ -10,6 +10,8 @@ class UCameraComponent;
 class UUserWidget;
 class UTextBlock;
 class UHealthComponent;
+class AWeaponBase;
+class UWeaponComponent;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter
 {
@@ -75,7 +77,7 @@ protected:
 	TObjectPtr<AActor>CurrentInteractable;
 
 
-
+	
 	FTimerHandle CheckInteractTimer;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Component")
@@ -89,6 +91,11 @@ protected:
 
 	void CheckInteract();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<USceneComponent>WeaponAttachPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UWeaponComponent>WeaponComponent;
 public:	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")

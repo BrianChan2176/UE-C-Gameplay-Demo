@@ -13,6 +13,8 @@
 #include "Core/MyPlayerController.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Weapons/WeaponBase.h"
+#include "Weapons/WeaponComponent.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -32,11 +34,13 @@ AMyCharacter::AMyCharacter()
 	//支持网络复制
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	WeaponAttachPoint = CreateDefaultSubobject <USceneComponent>(TEXT("WeaponAttachPoint"));
+	WeaponAttachPoint->SetupAttachment(GetMesh(),TEXT("WeaponSocket"));//武器附着点挂在Character上
+
+	WeaponComponent= CreateDefaultSubobject <UWeaponComponent>(TEXT("WeaponComponent"));
+	WeaponComponent->SetWeaponAttachPoint(WeaponAttachPoint);
 }
-
-
-
-
 
 
 
