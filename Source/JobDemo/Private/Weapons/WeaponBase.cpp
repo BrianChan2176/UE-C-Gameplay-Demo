@@ -30,7 +30,7 @@ void AWeaponBase::BeginPlay()
 	
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
 		return;
 	}
 
@@ -83,13 +83,8 @@ void AWeaponBase::Interact_Implementation(AActor* Interactor)
 {
 	if (!Interactor) { return; }
 	UE_LOG(LogTemp, Warning, TEXT("%s可交互"), *WeaponData->GunName.ToString(), CurrentAmmo);
-	AMyCharacter* PlayerCharacter=Cast<AMyCharacter>(Interactor);
-	if (!IsValid(PlayerCharacter))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("发起交互的不是MyCharacter"));
-		return;
-	}
-	UWeaponComponent* PlayerWeaponComponent=PlayerCharacter->FindComponentByClass<UWeaponComponent>();
+	//只关心判断有没有武器组件，不需要关心是不是Character所以不用Cast和降低没有必要的耦合
+	UWeaponComponent* PlayerWeaponComponent= Interactor->FindComponentByClass<UWeaponComponent>();
 	if (!IsValid(PlayerWeaponComponent))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("没有武器组件"));
@@ -99,7 +94,7 @@ void AWeaponBase::Interact_Implementation(AActor* Interactor)
 	PlayerWeaponComponent->TryPickUpWeapon(this);
 }
 
-bool AWeaponBase::EquitTo(USceneComponent* AttachPoint, APawn* OwnerPawn)
+bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//进入装备状态
 {
 	if (!IsValid(AttachPoint) || !IsValid(OwnerPawn) || !IsValid(StaticMeshComponent))
 	{

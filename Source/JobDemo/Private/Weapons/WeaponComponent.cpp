@@ -23,10 +23,13 @@ void UWeaponComponent::TryPickUpWeapon(AWeaponBase* WorldWeapon)
 	if(!IsValid(WorldWeapon)){return;}
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (!IsValid(WorldWeapon)) { return; }
+	if (!IsValid(OwnerPawn)) { return; }
 
+	if (IsValid(CurrentWeapon)) { return; }//判断如果武器组件上已经有武器就装备不了新的世界武器
 
-	WorldWeapon->EquitTo(WeaponAttachPoint, OwnerPawn);
+	const bool bIsEquitted=WorldWeapon->EquipTo(WeaponAttachPoint, OwnerPawn);//武器进入装备状态
+	if (bIsEquitted == false) { return; }
+
 	CurrentWeapon = WorldWeapon;
 }
 

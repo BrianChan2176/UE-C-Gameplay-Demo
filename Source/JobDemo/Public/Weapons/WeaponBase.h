@@ -49,5 +49,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon Component")
-	bool EquitTo(USceneComponent* AttachPoint, APawn* OwnerPawn);
+	bool EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn);
 };
