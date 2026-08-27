@@ -18,12 +18,15 @@ public:
 
 	void SetWeaponAttachPoint(USceneComponent* AttachPoint);
 
+	UFUNCTION()
 	void TryPickUpWeapon(AWeaponBase* WorldWeapon);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon",Replicated)
 	TObjectPtr<AWeaponBase>CurrentWeapon;//武器Actor
 
 	UPROPERTY()

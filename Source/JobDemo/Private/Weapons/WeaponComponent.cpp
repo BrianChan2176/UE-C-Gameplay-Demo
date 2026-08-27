@@ -3,13 +3,15 @@
 
 #include "Weapons/WeaponComponent.h"
 #include "Weapons/WeaponBase.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 	
+	SetIsReplicatedByDefault(true);
 	// ...
 }
 
@@ -20,6 +22,7 @@ void UWeaponComponent::SetWeaponAttachPoint(USceneComponent* AttachPoint)
 
 void UWeaponComponent::TryPickUpWeapon(AWeaponBase* WorldWeapon)
 {
+
 	if(!IsValid(WorldWeapon)){return;}
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -31,6 +34,12 @@ void UWeaponComponent::TryPickUpWeapon(AWeaponBase* WorldWeapon)
 	if (bIsEquitted == false) { return; }
 
 	CurrentWeapon = WorldWeapon;
+}
+
+void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UWeaponComponent, CurrentWeapon);
 }
 
 

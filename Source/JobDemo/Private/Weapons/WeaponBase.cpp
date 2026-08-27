@@ -10,7 +10,7 @@
 AWeaponBase::AWeaponBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 
 	SetRootComponent(StaticMeshComponent);
@@ -42,7 +42,7 @@ void AWeaponBase::ApplyWeaponData()
 {
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
 		return;
 	}
 
@@ -64,7 +64,7 @@ void AWeaponBase::Fire()
 {
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *WeaponData->GunName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
 		return;
 	}
 
@@ -81,7 +81,7 @@ void AWeaponBase::Fire()
 
 void AWeaponBase::Interact_Implementation(AActor* Interactor)
 {
-	if (!Interactor) { return; }
+	if (!Interactor || !WeaponData) { return; }
 	UE_LOG(LogTemp, Warning, TEXT("%s可交互"), *WeaponData->GunName.ToString(), CurrentAmmo);
 	//只关心判断有没有武器组件，不需要关心是不是Character所以不用Cast和降低没有必要的耦合
 	UWeaponComponent* PlayerWeaponComponent= Interactor->FindComponentByClass<UWeaponComponent>();
@@ -96,7 +96,7 @@ void AWeaponBase::Interact_Implementation(AActor* Interactor)
 
 bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//进入装备状态
 {
-	if (!IsValid(AttachPoint) || !IsValid(OwnerPawn) || !IsValid(StaticMeshComponent))
+	if (!IsValid(AttachPoint) || !IsValid(OwnerPawn) || !IsValid(StaticMeshComponent) || !HasAuthority() || IsValid(GetOwner()))
 	{
 		return false;
 	}
