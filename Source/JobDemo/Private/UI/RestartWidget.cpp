@@ -4,6 +4,7 @@
 #include "UI/RestartWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "Core/MyPlayerController.h"
 void URestartWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -25,8 +26,11 @@ void URestartWidget::NativeDestruct()
 
 void URestartWidget::RestartButtonClicked()
 {
-	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this, true);
-	if (CurrentLevelName.IsEmpty()) { return; }
-	UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
+	AMyPlayerController* PC =
+		Cast<AMyPlayerController>(GetOwningPlayer());
 
+	if (PC)
+	{
+		PC->ServerRestart();
+	}
 }

@@ -31,6 +31,10 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientVictory();
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerRestart();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -72,6 +76,7 @@ protected:
 	TSubclassOf<UVictoryWidget>VictoryWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UVictoryWidget>VictoryWidget;
+
 protected:
 	virtual void BeginPlay()override;
 
@@ -80,7 +85,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void TryInteract();
 
-	
+
 private:
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);

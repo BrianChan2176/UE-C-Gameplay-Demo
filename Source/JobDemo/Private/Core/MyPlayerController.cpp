@@ -12,6 +12,7 @@
 #include "UI/PlayerHealthWidget.h"
 #include "UI/RestartWidget.h"
 #include "UI/VictoryWidget.h"
+#include "Engine/World.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -126,6 +127,15 @@ void AMyPlayerController::TryInteract()
 	AMyCharacter* ControllCharacter = Cast<AMyCharacter>(GetPawn());
 	if (!ControllCharacter) { return; }
 	ControllCharacter->TryInteract();
+}
+
+void AMyPlayerController::ServerRestart_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World) 
+	{
+		World->ServerTravel(TEXT("/Game/Maps/NewWorld"));
+	}
 }
 
 void AMyPlayerController::ClientVictory_Implementation()
