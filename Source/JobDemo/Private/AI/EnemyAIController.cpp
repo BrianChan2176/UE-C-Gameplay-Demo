@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/MyCharacter.h"
 
+
 AEnemyAIController::AEnemyAIController()
 {
 	PrimaryActorTick.bCanEverTick = true;//要开因为AI Perception靠Controller的ControllRotation更新，关了Controller不更新→Perception不更新→视觉锥会固定
@@ -236,7 +237,6 @@ void AEnemyAIController::ResetAttackCoolDown()
 	bCanAttack = true;
 
 }
-
 
 
 void AEnemyAIController::Tick(float DeltaTime)

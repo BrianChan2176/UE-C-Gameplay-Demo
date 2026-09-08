@@ -72,4 +72,6 @@ private:
 	FTimerHandle AttackCoolDownTimerHandle;
 	float AttackCoolDown = 1.f;
 	float AIAttackRange = 1000.f;
+
+
 };

@@ -380,7 +380,7 @@ void AMyCharacter::TryInteract()
 
 void AMyCharacter::ServerInteract_Implementation(AActor* Interactor)
 {
-	//服务器检查合法性先不写
+
 	PerformInteract(Interactor);
 }
 
@@ -389,6 +389,15 @@ void AMyCharacter::PerformInteract(AActor* Interactor)
 	if (!HasAuthority()) { return; }
 	if (!Interactor) { return; }
 	if (!HealthComponent || HealthComponent->IsDead()) { return; }
+
+	//检查交互合法性，交互距离<=InteractRange才合法
+	const float ClientInteractDistance=FVector::Distance(GetActorLocation(), Interactor->GetActorLocation());
+	if (ClientInteractDistance > InteractRange)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("客户端交互距离不合法:%f"), ClientInteractDistance);
+		return;
+	}
+
 	if (!Interactor->GetClass()->ImplementsInterface(UInteractable::StaticClass())){return;}
 	IInteractable::Execute_Interact(Interactor, this);
 }
