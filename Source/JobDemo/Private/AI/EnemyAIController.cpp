@@ -143,7 +143,6 @@ void AEnemyAIController::GoToNextPatrolPoint()
 
 void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimulus Stimulus)
 {
-
 	AMyCharacter* Player = Cast<AMyCharacter>(Target);
 	if (!Player) { return; }
 
@@ -162,7 +161,14 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 	}
 	else 
 	{
-		UE_LOG(LogTemp, Display, TEXT("AI失去感知玩家")); 
+		if (TargetPlayer != Target) 
+		{
+			UE_LOG(LogTemp, Display, TEXT("失去感知的玩家%s不是正在追赶的玩家%s，所以忽略失去感知更新不停止追击"),*GetNameSafe(Target), *GetNameSafe(TargetPlayer));
+			return; 
+		}
+
+
+		UE_LOG(LogTemp, Display, TEXT("AI失去当前追击感知玩家"), *GetNameSafe(Target));
 		GetWorldTimerManager().ClearTimer(ChaseUpdateTimerHandle);
 		StopChasingAndResumePatrol();
 	}
