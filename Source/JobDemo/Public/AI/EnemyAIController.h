@@ -52,6 +52,9 @@ private:
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Target,FAIStimulus Stimulus);
 
+
+	AActor* FindVisibleAlivePlayer();
+
 	//追击玩家
 	EEnemyState CurrentState = EEnemyState::Patrol;//AI当前状态
 	UPROPERTY()

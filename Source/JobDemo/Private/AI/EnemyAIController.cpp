@@ -9,6 +9,8 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/MyCharacter.h"
+#include "Perception/AISense_Sight.h"
+#include "Components/HealthComponent.h"
 
 
 AEnemyAIController::AEnemyAIController()
@@ -163,15 +165,45 @@ void AEnemyAIController::HandleTargetPerceptionUpdated(AActor* Target, FAIStimul
 	{
 		if (TargetPlayer != Target) 
 		{
-			UE_LOG(LogTemp, Display, TEXT("失去感知的玩家%s不是正在追赶的玩家%s，所以忽略失去感知更新不停止追击"),*GetNameSafe(Target), *GetNameSafe(TargetPlayer));
+			UE_LOG(LogTemp, Display, TEXT("失去感知的玩家%s不是正在追赶的玩家%s，所以忽略非当前追击目标的失去感知更新不停止追击"),*GetNameSafe(Target), *GetNameSafe(TargetPlayer));
 			return; 
 		}
 
+		//寻找追击其他感知到的存活玩家
+		AActor* FoundAlivePlayer=FindVisibleAlivePlayer();
+		if (FoundAlivePlayer)
+		{
+			UE_LOG(LogTemp, Display,TEXT("AI切换追击目标：%s"),*GetNameSafe(FoundAlivePlayer));
+			StartChasing(FoundAlivePlayer);
+			return;//找到其他玩家不停止追击
+		}
 
-		UE_LOG(LogTemp, Display, TEXT("AI失去当前追击感知玩家"), *GetNameSafe(Target));
+		UE_LOG(LogTemp, Display, TEXT("AI失去当前追击感知玩家%s，而且没有其他感知到的存活玩家，恢复巡逻"), *GetNameSafe(Target));
 		GetWorldTimerManager().ClearTimer(ChaseUpdateTimerHandle);
 		StopChasingAndResumePatrol();
 	}
+}
+
+AActor* AEnemyAIController::FindVisibleAlivePlayer()
+{
+	if (!AIPerceptionComponent) { return nullptr; }
+
+	//先取所有看到的Actors装进数组
+	TArray<AActor*>PerceivedActors;
+	AIPerceptionComponent->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), PerceivedActors);
+	//遍历数组寻找存活的玩家
+	for (AActor* tempActor : PerceivedActors) 
+	{
+		AMyCharacter* Player=Cast<AMyCharacter>(tempActor);
+		if (!Player) { continue; }
+
+		UHealthComponent* Health=Player->FindComponentByClass<UHealthComponent>();
+		if (!Health || Health->IsDead()) { continue; }
+
+		return Player;
+	}
+
+	return nullptr;
 }
 
 void AEnemyAIController::StartChasing(AActor* Target)
