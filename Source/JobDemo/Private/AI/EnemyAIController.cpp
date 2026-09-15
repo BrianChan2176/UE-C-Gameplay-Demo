@@ -227,6 +227,7 @@ void AEnemyAIController::StopChasingAndResumePatrol()
 {
 	if (CurrentState != EEnemyState::Chasing) { return; }
 	//停止追击，清除玩家目标
+	GetWorldTimerManager().ClearTimer(ChaseUpdateTimerHandle);//停止追击更新timer
 	StopMovement();
 	ClearFocus(EAIFocusPriority::Gameplay);
 	CurrentState = EEnemyState::Patrol;
@@ -263,6 +264,26 @@ void AEnemyAIController::UpdateChase()
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetCharacter());
 	if (EnemyCharacter && TargetPlayer)
 	{
+		//如果目标已经死了，切换其他存活玩家目标
+		UHealthComponent* Health = TargetPlayer->FindComponentByClass<UHealthComponent>();
+		if (!Health || Health->IsDead())
+		{
+			//寻找追击其他感知到的存活玩家
+			AActor* FoundAlivePlayer = FindVisibleAlivePlayer();
+			if (FoundAlivePlayer)
+			{
+				UE_LOG(LogTemp, Display, TEXT("AI切换追击目标：%s"), *GetNameSafe(FoundAlivePlayer));
+				StartChasing(FoundAlivePlayer);
+				return;//找到其他存活玩家不停止追击
+			}
+			else 
+			{
+				StopChasingAndResumePatrol();//找不到其他存活目标，切换回巡逻状态
+				return;
+			}
+		}
+
+		//如果目标没死，就攻击玩家
 		EnemyCharacter->AttackTarget(TargetPlayer);
 		bCanAttack = false;
 		GetWorldTimerManager().SetTimer(AttackCoolDownTimerHandle, this, &AEnemyAIController::ResetAttackCoolDown, AttackCoolDown, false);
