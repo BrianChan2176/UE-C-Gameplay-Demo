@@ -21,7 +21,10 @@ public:
 	bool CanShoot()const;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Fire();
+	bool Fire();
+
+	UFUNCTION(BlueprintPure)
+	const UWeaponDataAsset* GetWeaponData()const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -35,8 +38,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ApplyWeaponData();//把数据从数据配置拿到实例
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Weapon Data")
-	bool bIsReloading = false;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	TObjectPtr<UStaticMeshComponent>StaticMeshComponent;

@@ -42,6 +42,11 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UWeaponComponent, CurrentWeapon);
 }
 
+AWeaponBase* UWeaponComponent::GetWeapon() const
+{
+	return CurrentWeapon;
+}
+
 
 // Called when the game starts
 void UWeaponComponent::BeginPlay()

@@ -22,6 +22,9 @@ public:
 	void TryPickUpWeapon(AWeaponBase* WorldWeapon);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintPure)
+	AWeaponBase* GetWeapon()const;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

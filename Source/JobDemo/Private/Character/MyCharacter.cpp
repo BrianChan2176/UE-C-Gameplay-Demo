@@ -15,6 +15,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Weapons/WeaponBase.h"
 #include "Weapons/WeaponComponent.h"
+#include "Weapons/WeaponDataAsset.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -292,10 +293,25 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	if (!HealthComponent || HealthComponent->IsDead()){return;}
 	if (ClientDirection.IsNearlyZero()) { return; }
 
+	//1.先从武器槽组件取得当前武器
+	if (!IsValid(WeaponComponent)) { return; }
+	AWeaponBase* CurrentWeapon = WeaponComponent->GetWeapon();
+	if (!IsValid(CurrentWeapon)) { return; }
+	if (CurrentWeapon->GetOwner() != this) { return; }//服务器确定武器属于当前角色
+	//2.取得武器的数据配置
+	const UWeaponDataAsset* WeaponDataAsset = CurrentWeapon->GetWeaponData();
+	if (!IsValid(WeaponDataAsset)) { return; }
+	if (WeaponDataAsset->MaxRange <= 0.f) { return; }
+	//3.武器扣子弹
+	bool bIsFireSucceed=CurrentWeapon->Fire();
+	if (!bIsFireSucceed) { return; }
+
+
+	//4.射击逻辑
 	AController* OwnerController=GetController();
 	if (!OwnerController) {  return; }
 	const FVector SafeDirection = ClientDirection.GetSafeNormal();   // 保留方向，强制把长度变成1
-	FVector End = ClientTraceStart + SafeDirection * ShootRange;
+	FVector End = ClientTraceStart + SafeDirection * WeaponDataAsset->MaxRange;//距离使用武器数据配置
 
 	FHitResult HitResult;
 
@@ -311,8 +327,8 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	{
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
-		UGameplayStatics::ApplyDamage(HittedActor, Damage, OwnerController, this, UDamageType::StaticClass());
-		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s 造成了 %f 伤害"),*HittedActor->GetName(), Damage);
+		UGameplayStatics::ApplyDamage(HittedActor, WeaponDataAsset->Damage, OwnerController, this, UDamageType::StaticClass());//伤害使用武器数据配置
+		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s     造成了武器配置伤害：%f "),*HittedActor->GetName(), WeaponDataAsset->Damage);
 	}
 }
 

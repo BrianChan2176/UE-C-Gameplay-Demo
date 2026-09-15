@@ -53,31 +53,39 @@ void AWeaponBase::ApplyWeaponData()
 
 bool AWeaponBase::CanShoot() const
 {
-	if (CurrentAmmo > 0 && bIsReloading == false)
+	if (CurrentAmmo > 0)
 	{
 		return true;
 	}
 	return false;
 }
 
-void AWeaponBase::Fire()
+bool AWeaponBase::Fire()
 {
 	if (!WeaponData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
-		return;
+		return false;
 	}
 
 	if (!CanShoot())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s当前不能射击"),*WeaponData->GunName.ToString());
-		return;
+		return false;
 	}
 
-	CurrentAmmo = CurrentAmmo - 1;
+	CurrentAmmo = CurrentAmmo - 1;//扣枪里的子弹
 
 	UE_LOG(LogTemp, Warning, TEXT("%s射击成功，剩下弹药：%d"), *WeaponData->GunName.ToString(),CurrentAmmo);
+	return true;
 }
+
+const UWeaponDataAsset* AWeaponBase::GetWeaponData() const
+{
+	return WeaponData;
+}
+
+
 
 void AWeaponBase::Interact_Implementation(AActor* Interactor)
 {
