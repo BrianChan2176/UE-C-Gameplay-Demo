@@ -6,7 +6,7 @@
 
 核心 Gameplay 逻辑使用 C++ 实现，Blueprint 用于资源配置、角色外观及 UMG 界面布局与绑定。
 
-[观看演示视频](https://www.bilibili.com/video/BV1K7eF6hEMy/?share_source=copy_web&vd_source=ac628cef45f9e52f29306cbd29b51d36) · [下载 Windows 版本](https://pan.baidu.com/s/18vaVbsl8Fsgbifo7sfd7Ng?pwd=1234)
+[观看演示视频](https://www.bilibili.com/video/BV1K7eF6hEMy/?share_source=copy_web&vd_source=ac628cef45f9e52f29306cbd29b51d36) · [下载 Windows 版本](https://pan.baidu.com/s/1G41hrr3aLIcJnwJpqF2B9Q?pwd=1234)
 
 ## Gameplay
 
