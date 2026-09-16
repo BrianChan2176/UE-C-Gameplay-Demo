@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
 	TObjectPtr<UWeaponDataAsset>WeaponData;//武器用哪个数据配置凹槽
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Weapon Data")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Weapon Data",Replicated)
 	int32 CurrentAmmo=0;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -45,11 +45,18 @@ protected:
 
 	virtual void Interact_Implementation(AActor* Interactor)override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Data", ReplicatedUsing = OnRep_Equipped)
+	bool bIsEquipped = false;//同步客户端枪已经装备的状态，关闭碰撞和物理，不然客户端武器模型和人物一卡一卡
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	UFUNCTION()
+	void OnRep_Equipped();//同步客户端枪已经装备的状态，关闭碰撞和物理，不然客户端武器模型和人物一卡一卡
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon Component")
 	bool EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn);
+
 };

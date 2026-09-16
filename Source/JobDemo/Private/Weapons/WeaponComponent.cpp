@@ -34,6 +34,8 @@ void UWeaponComponent::TryPickUpWeapon(AWeaponBase* WorldWeapon)
 	if (bIsEquitted == false) { return; }
 
 	CurrentWeapon = WorldWeapon;
+
+	
 }
 
 void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

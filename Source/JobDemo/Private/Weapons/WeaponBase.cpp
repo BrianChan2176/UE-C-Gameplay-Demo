@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Character/MyCharacter.h"
 #include "Weapons/WeaponComponent.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -123,8 +124,21 @@ bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//è¿›å…
 		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		return false;
 	}
-
+	bIsEquipped = true;
 	return true;
+}
+
+void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AWeaponBase, bIsEquipped);
+	DOREPLIFETIME(AWeaponBase, CurrentAmmo);
+}
+
+void AWeaponBase::OnRep_Equipped()
+{
+	StaticMeshComponent->SetSimulatePhysics(false);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame
