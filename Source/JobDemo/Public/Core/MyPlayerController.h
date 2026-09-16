@@ -12,6 +12,7 @@ class UUserWidget;
 class UPlayerHealthWidget;
 class URestartWidget;
 class UVictoryWidget;
+class UAmmoWidget;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -77,6 +78,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UVictoryWidget>VictoryWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UAmmoWidget>AmmoWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UAmmoWidget>AmmoWidget;
+
+	UFUNCTION(BlueprintPure, Category = "UI")
+	FText GetAmmoText() const;
 protected:
 	virtual void BeginPlay()override;
 

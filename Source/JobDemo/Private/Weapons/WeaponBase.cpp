@@ -46,8 +46,10 @@ void AWeaponBase::ApplyWeaponData()
 		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
 		return;
 	}
-
-	CurrentAmmo = WeaponData->MagazineSize;
+	if (HasAuthority())
+	{
+		CurrentAmmo = WeaponData->MagazineSize;
+	}
 	StaticMeshComponent->SetStaticMesh(WeaponData->GunMesh);
 	UE_LOG(LogTemp, Display, TEXT("%s武器数据初始化成功"), *WeaponData->GunName.ToString());
 }

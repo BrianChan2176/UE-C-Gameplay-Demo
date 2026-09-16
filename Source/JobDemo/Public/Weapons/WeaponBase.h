@@ -25,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	const UWeaponDataAsset* GetWeaponData()const;
+
+	int32 GetCurrentAmmo() const{return CurrentAmmo;}
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

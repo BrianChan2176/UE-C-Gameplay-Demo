@@ -13,6 +13,11 @@
 #include "UI/RestartWidget.h"
 #include "UI/VictoryWidget.h"
 #include "Engine/World.h"
+#include "UI/AmmoWidget.h"
+#include "Weapons/WeaponComponent.h"
+#include "Weapons/WeaponBase.h"
+#include "Weapons/WeaponDataAsset.h"
+#include "GameFramework/Pawn.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -40,6 +45,39 @@ void AMyPlayerController::ShowRestartWidget()
 		bShowMouseCursor = true;
 		
 	}
+}
+
+FText AMyPlayerController::GetAmmoText() const
+{
+	const FText EmptyText = FText::FromString(TEXT("-- / --"));
+
+	// 找到这个控制器正在控制的角色
+	const APawn* ControlledPawn = GetPawn();
+	if (!IsValid(ControlledPawn)) { return EmptyText; }
+
+	// 找到角色的武器组件
+	const UWeaponComponent* WeaponComp =
+		ControlledPawn->FindComponentByClass<UWeaponComponent>();
+
+	if (!IsValid(WeaponComp)) { return EmptyText; }
+
+	// 找到当前装备的武器
+	const AWeaponBase* Weapon = WeaponComp->GetWeapon();
+	if (!IsValid(Weapon))
+	{
+		return FText::FromString(TEXT("未装备"));
+	}
+
+	// 取得这把枪的配置
+	const UWeaponDataAsset* Data = Weapon->GetWeaponData();
+	if (!IsValid(Data)) { return EmptyText; }
+
+	// 29 / 30
+	return FText::FromString(FString::Printf(
+		TEXT("%d / %d"),
+		Weapon->GetCurrentAmmo(),
+		Data->MagazineSize
+	));
 }
 
 void AMyPlayerController::BeginPlay()
@@ -79,7 +117,14 @@ void AMyPlayerController::BeginPlay()
 		}
 	}
 
-
+	if (AmmoWidgetClass)
+	{
+		AmmoWidget = CreateWidget<UAmmoWidget>(this, AmmoWidgetClass);
+		if (AmmoWidget)
+		{
+			AmmoWidget->AddToViewport();
+		}
+	}
 }
 
 void AMyPlayerController::SetupInputComponent()
