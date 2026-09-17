@@ -31,6 +31,9 @@ protected:
 	virtual void OnMoveCompleted(FAIRequestID RequestID,const FPathFollowingResult& Result)override;
 
 	virtual void BeginPlay()override;
+
+	UFUNCTION(BlueprintCallable)
+	void MoveToRandomLocation();
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float AcceptanceRadius = 0.f;
@@ -76,5 +79,8 @@ private:
 	float AttackCoolDown = 1.f;
 	float AIAttackRange = 1000.f;
 
-
+	//随机巡逻参数
+	float PatrolRadius = 1000.f;
+	float AcceptainceRadius = 100.f;
+	FTimerHandle RandomPatrolTimer;
 };

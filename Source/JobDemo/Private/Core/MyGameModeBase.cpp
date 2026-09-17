@@ -40,10 +40,32 @@ void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<AActor*>Enemies;
+	FTimerHandle TimerHandle;
+
+	GetWorldTimerManager().SetTimer(
+		TimerHandle,
+		[this]()
+		{
+			TArray<AActor*> Enemies;
+			UGameplayStatics::GetAllActorsOfClass(
+				this,
+				AEnemyCharacter::StaticClass(),
+				Enemies
+			);
+
+			RemainingEnemies = Enemies.Num();
+
+			UE_LOG(LogTemp, Display, TEXT("Enemy Count: %d"), RemainingEnemies);
+		},
+		1.f,	
+		false
+	);
+
+
+/*	TArray<AActor*>Enemies;
 	UGameplayStatics::GetAllActorsOfClass(this, AEnemyCharacter::StaticClass(), Enemies);
 	RemainingEnemies = Enemies.Num();
-	UE_LOG(LogTemp,Display,TEXT("Enemy Count: %d"), RemainingEnemies);
+	UE_LOG(LogTemp,Display,TEXT("Enemy Count: %d"), RemainingEnemies);*/
 
 }
 

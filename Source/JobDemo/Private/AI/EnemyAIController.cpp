@@ -41,8 +41,21 @@ void AEnemyAIController::OnPossess(APawn* ControlledPawn)
 {
 	Super::OnPossess(ControlledPawn);
 
-	CurrentPatrolIndex = 0;
+	//如果巡逻点数组没巡逻点开始随机巡逻
+	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetPawn());
+	if (EnemyCharacter->PatrolPointsArray[0]==nullptr)
+	{ 
+		GetWorldTimerManager().SetTimer(//第一次移动要等东西加载，不然会失败直接跳过第一个目标点
+			StartPatrolTimerHandle,
+			this,
+			&AEnemyAIController::MoveToRandomLocation,
+			1.f,
+			true);
+		return; 
+	}
 
+	//如果有巡逻点按巡逻点巡逻
+	CurrentPatrolIndex = 0;
 	GetWorldTimerManager().SetTimer(//第一次移动要等东西加载，不然会失败直接跳过第一个目标点
 		StartPatrolTimerHandle,
 		this,
@@ -301,6 +314,25 @@ void AEnemyAIController::ResetAttackCoolDown()
 void AEnemyAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
 }  
+
+void AEnemyAIController::MoveToRandomLocation()
+{
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn) { return; }
+
+	UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NavigationSystem) { return; }
+	FNavLocation RandomLocation;
+	const bool bFoundLocation = NavigationSystem->GetRandomReachablePointInRadius(
+		ControlledPawn->GetActorLocation(),//起点圆心
+		PatrolRadius,//巡逻半径
+		RandomLocation//输出参数到FNavLocation类型的变量
+	);
+
+	if (bFoundLocation)
+	{
+		MoveToLocation(RandomLocation.Location, AcceptainceRadius);
+		//参数1目标位置，参数2距离目标多远半径就足够
+	}
+}

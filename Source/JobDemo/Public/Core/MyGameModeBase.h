@@ -20,4 +20,5 @@ protected:
 private:
 	int32 RemainingEnemies = 0;
 	bool bGameFinished = false;
+	
 };
