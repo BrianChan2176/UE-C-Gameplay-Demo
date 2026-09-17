@@ -43,7 +43,7 @@ void AEnemyAIController::OnPossess(APawn* ControlledPawn)
 
 	//如果巡逻点数组没巡逻点开始随机巡逻
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetPawn());
-	if (EnemyCharacter->PatrolPointsArray[0]==nullptr)
+	if (EnemyCharacter->PatrolPointsArray.IsEmpty() || EnemyCharacter->PatrolPointsArray[0]==nullptr)
 	{ 
 		GetWorldTimerManager().SetTimer(//第一次移动要等东西加载，不然会失败直接跳过第一个目标点
 			StartPatrolTimerHandle,
@@ -318,6 +318,7 @@ void AEnemyAIController::Tick(float DeltaTime)
 
 void AEnemyAIController::MoveToRandomLocation()
 {
+	if (CurrentState != EEnemyState::Patrol) { return; }
 	APawn* ControlledPawn = GetPawn();
 	if (!ControlledPawn) { return; }
 
