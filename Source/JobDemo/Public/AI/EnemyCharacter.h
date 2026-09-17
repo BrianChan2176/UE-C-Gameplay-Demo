@@ -36,7 +36,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
 	float AIAttackRange = 1000.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
-	float AIDamage = 5.f;
+	float AIDamage = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage>DeathMontage;

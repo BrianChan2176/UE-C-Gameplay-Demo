@@ -18,6 +18,7 @@
 #include "Weapons/WeaponBase.h"
 #include "Weapons/WeaponDataAsset.h"
 #include "GameFramework/Pawn.h"
+#include "Core/MyGameInstance.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -179,6 +180,13 @@ void AMyPlayerController::ServerRestart_Implementation()
 	UWorld* World = GetWorld();
 	if (World) 
 	{
+		//死亡重置伤害倍率
+		UMyGameInstance* GI =Cast<UMyGameInstance>(GetGameInstance());
+		if (GI)
+		{
+			GI->ResetRun();
+		}
+
 		World->ServerTravel(TEXT("/Game/Maps/NewWorld"));
 	}
 }

@@ -7,6 +7,7 @@
 #include "Core/MyPlayerController.h"
 #include "Core/MyGameStateBase.h"
 #include "Engine/World.h"
+#include "Core/MyGameInstance.h"
 AMyGameModeBase::AMyGameModeBase()
 {
 	GameStateClass = AMyGameStateBase::StaticClass();
@@ -24,13 +25,16 @@ void AMyGameModeBase::NotifyEnemyDied()
 	bGameFinished = true;//结束游戏
 
 	// 获取当前地图名，true 表示去掉编辑器运行时添加的前缀
-	const FString CurrentLevelName =
-		UGameplayStatics::GetCurrentLevelName(this, true);
+	const FString CurrentLevelName =UGameplayStatics::GetCurrentLevelName(this, true);
+
+	UMyGameInstance* GI =Cast<UMyGameInstance>(GetGameInstance());
+
 
 	// 第一关清空：进入第二关
 	if (CurrentLevelName == TEXT("NewWorld"))
 	{
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/LevelTwo"));
+		GI->ApplyDamageUpdate();
 		return;
 	}
 
@@ -38,6 +42,7 @@ void AMyGameModeBase::NotifyEnemyDied()
 	if (CurrentLevelName == TEXT("LevelTwo"))
 	{
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/LevelThree"));
+		GI->ApplyDamageUpdate();
 		return;
 	}
 

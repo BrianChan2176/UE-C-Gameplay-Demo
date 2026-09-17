@@ -16,6 +16,7 @@
 #include "Weapons/WeaponBase.h"
 #include "Weapons/WeaponComponent.h"
 #include "Weapons/WeaponDataAsset.h"
+#include "Core/MyGameInstance.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -76,6 +77,7 @@ void AMyCharacter::BeginPlay()
 
 void AMyCharacter::HandleDeath()
 {
+
 	// 停止交互检测
 	GetWorldTimerManager().ClearTimer(CheckInteractTimer);
 	if (InteractPromptWidget)
@@ -323,12 +325,20 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	const FVector ImpactPoint = bHitted ? HitResult.ImpactPoint : End;//射线效果如果命中记录和只射线到命中点，没命中打完射线
 	MulticastPlayShootEffects(ClientTraceStart, ImpactPoint, bHitted);
 
+	float FinalDamage = WeaponDataAsset->Damage;
+	UMyGameInstance* GI =Cast<UMyGameInstance>(GetGameInstance());
+	if (GI)
+	{
+		FinalDamage = FinalDamage * GI->DamageMultiplier;
+	}
+
+
 	if (bHitted)
 	{
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
-		UGameplayStatics::ApplyDamage(HittedActor, WeaponDataAsset->Damage, OwnerController, this, UDamageType::StaticClass());//伤害使用武器数据配置
-		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s     造成了武器配置伤害：%f "),*HittedActor->GetName(), WeaponDataAsset->Damage);
+		UGameplayStatics::ApplyDamage(HittedActor, FinalDamage, OwnerController, this, UDamageType::StaticClass());//伤害使用武器数据配置
+		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s     造成了武器配置伤害：%f "),*HittedActor->GetName(), FinalDamage);
 	}
 }
 
