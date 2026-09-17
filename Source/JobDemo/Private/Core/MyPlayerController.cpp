@@ -237,19 +237,23 @@ void AMyPlayerController::Reward()
 	if (RewardWidget)
 	{
 		RewardWidget->SetVisibility(ESlateVisibility::Visible);
-			FTimerHandle RewardTimer;
-			GetWorld()->GetTimerManager().SetTimer(
-				RewardTimer,
-				[this]()
-				{
-					RewardWidget->SetVisibility(ESlateVisibility::Hidden);
-				},
-				2.5f,
-				false
-			);
+		GetWorld()->GetTimerManager().SetTimer(
+			RewardTimer,
+			this,
+			&AMyPlayerController::HideRewardWidget,
+			2.5f,
+			false);
 
 		}
 	
+}
+
+void AMyPlayerController::HideRewardWidget()
+{
+	if (IsValid(RewardWidget))
+	{
+		RewardWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 

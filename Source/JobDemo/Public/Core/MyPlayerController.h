@@ -111,4 +111,7 @@ private:
 	void StartSprinting(const FInputActionValue& Value);
 	void StopSprinting(const FInputActionValue& Value);
 	void Shoot(const FInputActionValue& Value);
+
+	FTimerHandle RewardTimer;
+	void HideRewardWidget();
 };
