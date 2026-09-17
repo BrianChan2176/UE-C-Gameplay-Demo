@@ -12,6 +12,7 @@
 #include "UI/PlayerHealthWidget.h"
 #include "UI/RestartWidget.h"
 #include "UI/VictoryWidget.h"
+#include "UI/RewardWidget.h"
 #include "Engine/World.h"
 #include "UI/AmmoWidget.h"
 #include "Weapons/WeaponComponent.h"
@@ -19,6 +20,7 @@
 #include "Weapons/WeaponDataAsset.h"
 #include "GameFramework/Pawn.h"
 #include "Core/MyGameInstance.h"
+
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -126,6 +128,16 @@ void AMyPlayerController::BeginPlay()
 			AmmoWidget->AddToViewport();
 		}
 	}
+
+	if (RewardWidgetClass)
+	{
+		RewardWidget = CreateWidget<URewardWidget>(this, RewardWidgetClass);
+		if (RewardWidget)
+		{
+			RewardWidget->AddToViewport(1000);
+			RewardWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 void AMyPlayerController::SetupInputComponent()
@@ -197,6 +209,50 @@ void AMyPlayerController::ClientVictory_Implementation()
 	Victory();
 }
 
+void AMyPlayerController::Victory()
+{
+	//ShowRestartWidget();//单机重开
+	if (VictoryWidgetClass)
+	{
+		VictoryWidget = CreateWidget<UVictoryWidget>(this, VictoryWidgetClass);
+		if (VictoryWidget)
+		{
+			VictoryWidget->AddToViewport(1000);
+			HideCrosshair();
+			SetIgnoreMoveInput(true);
+			SetIgnoreLookInput(true);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
+void AMyPlayerController::ClientReward_Implementation()
+{
+	if (!IsLocalController()) { return; }
+	Reward();
+}
+
+void AMyPlayerController::Reward()
+{
+	if (RewardWidget)
+	{
+		RewardWidget->SetVisibility(ESlateVisibility::Visible);
+			FTimerHandle RewardTimer;
+			GetWorld()->GetTimerManager().SetTimer(
+				RewardTimer,
+				[this]()
+				{
+					RewardWidget->SetVisibility(ESlateVisibility::Hidden);
+				},
+				2.5f,
+				false
+			);
+
+		}
+	
+}
+
+
 void AMyPlayerController::Move(const FInputActionValue& Value)
 {
 	FVector2D MoveVector = Value.Get<FVector2D>();
@@ -253,19 +309,3 @@ void AMyPlayerController::Shoot(const FInputActionValue& Value)
 	ControllCharacter->ShootDamage();
 }
 
-void AMyPlayerController::Victory()
-{
-	//ShowRestartWidget();//单机重开
-	if (VictoryWidgetClass)
-	{
-		VictoryWidget = CreateWidget<UVictoryWidget>(this, VictoryWidgetClass);
-		if (VictoryWidget)
-		{
-			VictoryWidget->AddToViewport(1000);
-			HideCrosshair();
-			SetIgnoreMoveInput(true);
-			SetIgnoreLookInput(true);
-			bShowMouseCursor = true;
-		}
-	}
-}

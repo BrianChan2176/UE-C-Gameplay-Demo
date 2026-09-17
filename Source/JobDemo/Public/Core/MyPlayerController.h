@@ -13,6 +13,7 @@ class UPlayerHealthWidget;
 class URestartWidget;
 class UVictoryWidget;
 class UAmmoWidget;
+class URewardWidget;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -29,10 +30,13 @@ public:
 	void ShowRestartWidget();
 
 	void Victory();
-
 	UFUNCTION(Client, Reliable)
 	void ClientVictory();
 
+
+	void Reward();
+	UFUNCTION(Client, Reliable)
+	void ClientReward();
 
 	UFUNCTION(Server, Reliable)
 	void ServerRestart();
@@ -77,6 +81,11 @@ protected:
 	TSubclassOf<UVictoryWidget>VictoryWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UVictoryWidget>VictoryWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<URewardWidget>RewardWidgetClass;
+	UPROPERTY()
+	TObjectPtr<URewardWidget>RewardWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UAmmoWidget>AmmoWidgetClass;

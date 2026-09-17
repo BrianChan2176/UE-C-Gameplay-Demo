@@ -28,21 +28,39 @@ void AMyGameModeBase::NotifyEnemyDied()
 	const FString CurrentLevelName =UGameplayStatics::GetCurrentLevelName(this, true);
 
 	UMyGameInstance* GI =Cast<UMyGameInstance>(GetGameInstance());
-
+	FConstPlayerControllerIterator PlayerControllerIT = GetWorld()->GetPlayerControllerIterator();
 
 	// 第一关清空：进入第二关
 	if (CurrentLevelName == TEXT("NewWorld"))
 	{
+		for (PlayerControllerIT;PlayerControllerIT;++PlayerControllerIT)
+		{
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerControllerIT->Get());
+			if (PlayerController)
+			{
+				PlayerController->ClientReward();
+			}
+		}
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/LevelTwo"));
 		GI->ApplyDamageUpdate();
+
 		return;
 	}
 
 	// 第二关清空：进入第三关
 	if (CurrentLevelName == TEXT("LevelTwo"))
 	{
+		for (PlayerControllerIT;PlayerControllerIT;++PlayerControllerIT)
+		{
+			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerControllerIT->Get());
+			if (PlayerController)
+			{
+				PlayerController->ClientReward();
+			}
+		}
 		GetWorld()->ServerTravel(TEXT("/Game/Maps/LevelThree"));
 		GI->ApplyDamageUpdate();
+
 		return;
 	}
 
@@ -50,7 +68,6 @@ void AMyGameModeBase::NotifyEnemyDied()
 	if (CurrentLevelName == TEXT("LevelThree"))
 	{
 		//服务器GameMODE用World里的PlayerController迭代器遍历所有PlayerController调用Client RPC命令，每个客户端显示胜利UI
-		FConstPlayerControllerIterator PlayerControllerIT = GetWorld()->GetPlayerControllerIterator();
 		for (PlayerControllerIT;PlayerControllerIT;++PlayerControllerIT)
 		{
 			AMyPlayerController* PlayerController = Cast<AMyPlayerController>(PlayerControllerIT->Get());
