@@ -7,6 +7,7 @@
 #include "Character/MyCharacter.h"
 #include "Weapons/WeaponComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/World.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -56,11 +57,18 @@ void AWeaponBase::ApplyWeaponData()
 
 bool AWeaponBase::CanShoot() const
 {
-	if (CurrentAmmo > 0)
+	if (CurrentAmmo <= 0)
 	{
-		return true;
+		return false;
 	}
-	return false;
+
+	//射速限制的判断条件：现在的世界时间-上一发开火的世界时间>=射击CD 才允许射击。返回false不能shoot现在判断式写相反
+	if (!WeaponData) { return false; }
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (PreviousShotTime >=0 && CurrentTime - PreviousShotTime< WeaponData->ShootCD) { return false; }//如果已经开过首枪而且距离上次射击时间小于CD不可以射击
+
+	
+	return true;
 }
 
 bool AWeaponBase::Fire()
@@ -77,9 +85,10 @@ bool AWeaponBase::Fire()
 		return false;
 	}
 
+	PreviousShotTime= GetWorld()->GetTimeSeconds();//记录上一发子弹的世界时间
 	CurrentAmmo = CurrentAmmo - 1;//扣枪里的子弹
 
-	UE_LOG(LogTemp, Warning, TEXT("%s射击成功，剩下弹药：%d"), *WeaponData->GunName.ToString(),CurrentAmmo);
+	UE_LOG(LogTemp, Warning, TEXT("%s射击成功，剩下弹药：%d，本次开火世界时间：%f"), *WeaponData->GunName.ToString(),CurrentAmmo,PreviousShotTime);
 	return true;
 }
 

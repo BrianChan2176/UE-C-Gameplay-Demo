@@ -54,6 +54,10 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_Equipped();//同步客户端枪已经装备的状态，关闭碰撞和物理，不然客户端武器模型和人物一卡一卡
+
+
+
+	float PreviousShotTime=-1.0f;//记录距离上一发开火时间
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

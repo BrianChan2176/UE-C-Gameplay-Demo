@@ -84,7 +84,7 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 
-	GetWorldTimerManager().SetTimer(
+	GetWorldTimerManager().SetTimer(//等一会才统计当前关卡有多少AI因为随机生成
 		EnemyCountTimer,
 		this,
 		&AMyGameModeBase::CountEnemies,

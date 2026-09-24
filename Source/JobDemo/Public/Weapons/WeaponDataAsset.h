@@ -28,4 +28,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
     TObjectPtr<UStaticMesh>GunMesh;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat", meta = (ClampMin = "0.0"))
+    float ShootCD = 0.4f;
 };
