@@ -84,6 +84,16 @@ void AMyCharacter::HandleDeath()
 	{
 		InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+	//取消换弹
+	if (WeaponComponent) 
+	{
+		AWeaponBase* CurrentWeapon = WeaponComponent->GetWeapon();
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->CancelReload();
+		}
+	}
+
 	// 停止玩家移动
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();

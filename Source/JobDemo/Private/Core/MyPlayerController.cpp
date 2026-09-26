@@ -178,6 +178,11 @@ void AMyPlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AMyPlayerController::Shoot);
 	}
+
+	if (IA_Reload)
+	{
+		EnhancedInputComponent->BindAction(IA_Reload, ETriggerEvent::Started, this, &AMyPlayerController::Reload);
+	}
 }
 
 void AMyPlayerController::TryInteract()
@@ -313,3 +318,12 @@ void AMyPlayerController::Shoot(const FInputActionValue& Value)
 	ControllCharacter->ShootDamage();
 }
 
+void AMyPlayerController::Reload(const FInputActionValue& Value)
+{
+	if (!GetPawn()) { return; }
+	UWeaponComponent* CharacterWeaponComponent=GetPawn()->FindComponentByClass<UWeaponComponent>();
+	if (!CharacterWeaponComponent) { return; }
+	AWeaponBase* CurrentWeapon=CharacterWeaponComponent->GetWeapon();
+	if (!CurrentWeapon) { return; }
+	CurrentWeapon->Reload();
+}

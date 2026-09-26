@@ -8,6 +8,7 @@
 #include "Weapons/WeaponComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
+#include "Components/HealthComponent.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -67,7 +68,9 @@ bool AWeaponBase::CanShoot() const
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 	if (PreviousShotTime >=0 && CurrentTime - PreviousShotTime< WeaponData->ShootCD) { return false; }//如果已经开过首枪而且距离上次射击时间小于CD不可以射击
 
-	
+	//判断正在换弹不能射击
+	if (bReloading) { return false; }
+
 	return true;
 }
 
@@ -139,17 +142,61 @@ bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//进�
 	return true;
 }
 
+
+
 void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWeaponBase, bIsEquipped);
 	DOREPLIFETIME(AWeaponBase, CurrentAmmo);
+	DOREPLIFETIME(AWeaponBase, bReloading);
 }
 
 void AWeaponBase::OnRep_Equipped()
 {
 	StaticMeshComponent->SetSimulatePhysics(false);
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AWeaponBase::Reload_Implementation()
+{
+	if (!WeaponData) { return; }
+	if (bReloading) { return; }
+	if (CurrentAmmo == WeaponData->MagazineSize) { return; }
+	if (!GetWorld()) { return; }
+
+	//如果死亡不能换弹
+	AActor* WeaponOwner = GetOwner();
+	if (!WeaponOwner) { return; }
+	const UHealthComponent* Health =WeaponOwner->FindComponentByClass<UHealthComponent>();
+	if (!Health || Health->IsDead()) { return; }
+
+	bReloading = true;
+	UE_LOG(LogTemp, Display, TEXT("Reloading..."));
+	//假设播放换弹动画，暂无
+	GetWorld()->GetTimerManager().SetTimer(
+		ReloadTimer,
+		this,
+		&AWeaponBase::ReloadCompleted,
+		WeaponData->ReloadDuration,
+		false
+	);
+	
+}
+
+void AWeaponBase::ReloadCompleted()
+{
+	if (!WeaponData) { return; }
+	CurrentAmmo = WeaponData->MagazineSize;
+	bReloading = false;
+	UE_LOG(LogTemp, Display, TEXT("Reloaded"));
+}
+
+void AWeaponBase::CancelReload_Implementation()
+{
+	if (!GetWorld()) { return; }
+	GetWorldTimerManager().ClearTimer(ReloadTimer);
+	bReloading = false;
 }
 
 // Called every frame

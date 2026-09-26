@@ -58,6 +58,14 @@ protected:
 
 
 	float PreviousShotTime=-1.0f;//记录距离上一发开火时间
+
+	//换弹
+	UPROPERTY(Replicated)
+	bool bReloading = false;
+	FTimerHandle ReloadTimer;
+	void ReloadCompleted();
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -65,4 +73,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon Component")
 	bool EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn);
 
+	UFUNCTION(BlueprintCallable,Server,Reliable)
+	void Reload();
+
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void CancelReload();
 };
