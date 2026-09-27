@@ -25,15 +25,27 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	AWeaponBase* GetWeapon()const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchWeapons();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon",Replicated)
-	TObjectPtr<AWeaponBase>CurrentWeapon;//武器Actor
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon",ReplicatedUsing= OnRep_UpdateWeaponsMesh)
+	TObjectPtr<AWeaponBase>CurrentWeapon;//当前使用武器Actor
 
 	UPROPERTY()
 	TObjectPtr<USceneComponent>WeaponAttachPoint;//引用角色武器挂点
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon", ReplicatedUsing = OnRep_UpdateWeaponsMesh)
+	TObjectPtr<AWeaponBase>BackUpWeapon;//后备武器Actor
+
+	UFUNCTION()
+	void OnRep_UpdateWeaponsMesh();
+
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

@@ -142,6 +142,14 @@ bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//è¿›å…
 	return true;
 }
 
+void AWeaponBase::SetWeaponVisibility(bool bVisible)
+{
+	if (StaticMeshComponent)
+	{
+		StaticMeshComponent->SetVisibility(bVisible, true);
+	}
+}
+
 
 
 void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

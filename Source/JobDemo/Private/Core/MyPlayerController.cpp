@@ -183,6 +183,11 @@ void AMyPlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(IA_Reload, ETriggerEvent::Started, this, &AMyPlayerController::Reload);
 	}
+
+	if (IA_SwitchWeapon)
+	{
+		EnhancedInputComponent->BindAction(IA_SwitchWeapon, ETriggerEvent::Started, this, &AMyPlayerController::SwitchWeapon);
+	}
 }
 
 void AMyPlayerController::TryInteract()
@@ -326,4 +331,12 @@ void AMyPlayerController::Reload(const FInputActionValue& Value)
 	AWeaponBase* CurrentWeapon=CharacterWeaponComponent->GetWeapon();
 	if (!CurrentWeapon) { return; }
 	CurrentWeapon->Reload();
+}
+
+void AMyPlayerController::SwitchWeapon(const FInputActionValue& Value)
+{
+	if (!GetPawn()) { return; }
+	UWeaponComponent* CharacterWeaponComponent = GetPawn()->FindComponentByClass<UWeaponComponent>();
+	if (!CharacterWeaponComponent) { return; }
+	CharacterWeaponComponent->ServerSwitchWeapons();
 }

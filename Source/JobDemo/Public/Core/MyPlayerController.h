@@ -66,6 +66,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TObjectPtr<UInputAction>IA_Reload;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TObjectPtr<UInputAction>IA_SwitchWeapon;
+
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Combat")
 	TSubclassOf<UUserWidget>CrosshairWidgetClass;
 	UPROPERTY()
@@ -116,6 +120,8 @@ private:
 	void StopSprinting(const FInputActionValue& Value);
 	void Shoot(const FInputActionValue& Value);
 	void Reload(const FInputActionValue& Value);
+	void SwitchWeapon(const FInputActionValue& Value);
+
 
 	FTimerHandle RewardTimer;
 	void HideRewardWidget();

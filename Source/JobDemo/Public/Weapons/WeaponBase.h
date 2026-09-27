@@ -78,4 +78,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void CancelReload();
+
+	void SetWeaponVisibility(bool bVisible);//武器显示或者隐藏自己的mesh
 };
