@@ -12,6 +12,7 @@ class UTextBlock;
 class UHealthComponent;
 class AWeaponBase;
 class UWeaponComponent;
+class USoundBase;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter
 {
@@ -50,8 +51,8 @@ protected:
 
 	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirection);//服务器权威射击
 
-	UFUNCTION(NetMulticast,Unreliable)
-	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted);
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted,USoundBase* FireSound,FVector FireLocation);
 
 	UFUNCTION(Server,Reliable)
 	void ServerSprint(bool IsSprinting);//发送奔跑请求

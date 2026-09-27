@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "WeaponDataAsset.generated.h"
-
+class USoundBase;
 UCLASS()
 class JOBDEMO_API UWeaponDataAsset : public UDataAsset
 {
@@ -34,4 +34,8 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat", meta = (ClampMin = "0.0"))
     float ReloadDuration = 1.5f;
+
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat")
+    TObjectPtr<USoundBase>FireSound=nullptr;
 };
