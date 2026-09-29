@@ -20,7 +20,9 @@
 #include "Weapons/WeaponDataAsset.h"
 #include "GameFramework/Pawn.h"
 #include "Core/MyGameInstance.h"
-
+#include "UI/HitMakerWidget.h"
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -48,6 +50,22 @@ void AMyPlayerController::ShowRestartWidget()
 		bShowMouseCursor = true;
 		
 	}
+}
+
+void AMyPlayerController::FlashHitMakerWithSound_Implementation()
+{
+	if (!HitMakerWidget) { return; }
+	HitMakerWidget->SetVisibility(ESlateVisibility::Visible);
+	if (!GetWorld()) { return; }
+	GetWorld()->GetTimerManager().SetTimer(HitMakerTimer, this, &AMyPlayerController::HideHitMaker, HitMakerDuration, false);
+	if (!HitMakerSound) { return; }
+	UGameplayStatics::PlaySound2D(this, HitMakerSound);
+}
+
+void AMyPlayerController::HideHitMaker()
+{
+	if (!HitMakerWidget) { return; }
+	HitMakerWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 FText AMyPlayerController::GetAmmoText() const
@@ -136,6 +154,16 @@ void AMyPlayerController::BeginPlay()
 		{
 			RewardWidget->AddToViewport(1000);
 			RewardWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	if (HitMakerWidgetClass)
+	{
+		HitMakerWidget = CreateWidget<UHitMakerWidget>(this, HitMakerWidgetClass);
+		if (HitMakerWidget)
+		{
+			HitMakerWidget->AddToViewport(1000);
+			HitMakerWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }

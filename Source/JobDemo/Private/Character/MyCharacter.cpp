@@ -348,6 +348,18 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	{
 		AActor* HittedActor = HitResult.GetActor();
 		if (!HittedActor) { return; }
+
+		//如果命中播放命中反馈
+		AMyPlayerController* PlayerController = Cast<AMyPlayerController>(OwnerController);
+		if (PlayerController)
+		{
+			UHealthComponent* Health=HittedActor->FindComponentByClass<UHealthComponent>();
+			if(Health && !Health->IsDead())
+			{
+				PlayerController->FlashHitMakerWithSound();
+			}
+		}
+		//真正造成伤害
 		UGameplayStatics::ApplyDamage(HittedActor, FinalDamage, OwnerController, this, UDamageType::StaticClass());//伤害使用武器数据配置
 		UE_LOG(LogTemp,Warning,TEXT("服务器对 %s     造成了武器配置伤害：%f "),*HittedActor->GetName(), FinalDamage);
 	}

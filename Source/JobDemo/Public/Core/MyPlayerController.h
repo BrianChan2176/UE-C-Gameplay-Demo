@@ -14,6 +14,8 @@ class URestartWidget;
 class UVictoryWidget;
 class UAmmoWidget;
 class URewardWidget;
+class UHitMakerWidget;
+class USoundBase;
 UCLASS()
 class JOBDEMO_API AMyPlayerController : public APlayerController
 {
@@ -40,6 +42,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRestart();
+
+	UFUNCTION(Client, Reliable)
+	void FlashHitMakerWithSound();
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -99,6 +104,17 @@ protected:
 	TSubclassOf<UAmmoWidget>AmmoWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UAmmoWidget>AmmoWidget;
+
+	//命中反馈
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UHitMakerWidget>HitMakerWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UHitMakerWidget>HitMakerWidget;
+	FTimerHandle HitMakerTimer;
+	float HitMakerDuration = 0.1f;
+	void HideHitMaker();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Feedback")
+	TObjectPtr<USoundBase>HitMakerSound;
 
 	UFUNCTION(BlueprintPure, Category = "UI")
 	FText GetAmmoText() const;
