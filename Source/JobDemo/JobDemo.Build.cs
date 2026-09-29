@@ -11,7 +11,8 @@ public class JobDemo : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","UMG",
 			"AIModule",
 			"NavigationSystem",
-			"GameplayTasks" });
+			"GameplayTasks",
+            "Niagara"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {    "Slate","SlateCore"  });
 

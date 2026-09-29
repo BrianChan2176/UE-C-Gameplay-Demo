@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "WeaponDataAsset.generated.h"
+
 class USoundBase;
+class UNiagaraSystem;
+
 UCLASS()
 class JOBDEMO_API UWeaponDataAsset : public UDataAsset
 {
@@ -38,4 +41,10 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat")
     TObjectPtr<USoundBase>FireSound=nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Effects")
+    TObjectPtr<UNiagaraSystem>MuzzleFlash = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Effects")
+    FName MuzzleSocketName = TEXT("Muzzle");
 };

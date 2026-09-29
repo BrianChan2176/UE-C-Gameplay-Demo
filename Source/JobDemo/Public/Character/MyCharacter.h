@@ -52,7 +52,7 @@ protected:
 	void PerformShoot(const FVector& ClientTraceStart, const FVector& ClientDirection);//服务器权威射击
 
 	UFUNCTION(NetMulticast,Reliable)
-	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted,USoundBase* FireSound,FVector FireLocation);
+	void MulticastPlayShootEffects(FVector TraceStart, FVector TraceEnd,bool bHitted,USoundBase* FireSound,FVector FireLocation,AWeaponBase* CurrentWeapon);
 
 	UFUNCTION(Server,Reliable)
 	void ServerSprint(bool IsSprinting);//发送奔跑请求

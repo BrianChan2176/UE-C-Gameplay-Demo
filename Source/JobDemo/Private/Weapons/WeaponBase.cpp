@@ -9,6 +9,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
 #include "Components/HealthComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -24,6 +26,29 @@ AWeaponBase::AWeaponBase()
 
 	bReplicates = true;
 	SetReplicateMovement(true);
+}
+
+void AWeaponBase::playMuzzleFlash()
+{
+	const FName SocketName = WeaponData->MuzzleSocketName;
+
+	if (!StaticMeshComponent->DoesSocketExist(SocketName)) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s 缺少枪口 Socket：%s"),*GetName(), *SocketName.ToString());
+		return; 
+	}
+
+	UNiagaraFunctionLibrary::SpawnSystemAttached(
+		WeaponData->MuzzleFlash,
+		StaticMeshComponent,
+		SocketName,
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		EAttachLocation::SnapToTarget,
+		true,
+		true
+	);
+
 }
 
 // Called when the game starts or when spawned

@@ -8,6 +8,7 @@
 #include "WeaponBase.generated.h"
 class UWeaponDataAsset;
 class UStaticMeshComponent;
+
 UCLASS()
 class JOBDEMO_API AWeaponBase : public AActor,public IInteractable
 {
@@ -27,6 +28,8 @@ public:
 	const UWeaponDataAsset* GetWeaponData()const;
 
 	int32 GetCurrentAmmo() const{return CurrentAmmo;}
+
+	void playMuzzleFlash();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

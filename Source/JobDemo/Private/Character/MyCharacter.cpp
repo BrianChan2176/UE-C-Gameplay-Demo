@@ -334,7 +334,7 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	bool bHitted = GetWorld()->LineTraceSingleByChannel(HitResult, ClientTraceStart, End, ECC_Visibility, Params);
 
 	const FVector ImpactPoint = bHitted ? HitResult.ImpactPoint : End;//射线效果如果命中记录和只射线到命中点，没命中打完射线
-	MulticastPlayShootEffects(ClientTraceStart, ImpactPoint, bHitted,WeaponDataAsset->FireSound, CurrentWeapon->GetActorLocation());
+	MulticastPlayShootEffects(ClientTraceStart, ImpactPoint, bHitted,WeaponDataAsset->FireSound, CurrentWeapon->GetActorLocation(), CurrentWeapon);
 
 	float FinalDamage = WeaponDataAsset->Damage;
 	UMyGameInstance* GI =Cast<UMyGameInstance>(GetGameInstance());
@@ -353,12 +353,14 @@ void AMyCharacter::PerformShoot(const FVector& ClientTraceStart, const FVector& 
 	}
 }
 
-void AMyCharacter::MulticastPlayShootEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHitted, USoundBase* FireSound, FVector FireLocation)//同步服务器+所有客户端射线效果
+void AMyCharacter::MulticastPlayShootEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHitted, USoundBase* FireSound, FVector FireLocation, AWeaponBase* CurrentWeapon)//同步服务器+所有客户端射线效果
 {
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, FireLocation);
 	}
+	if (!CurrentWeapon) { return; }
+	CurrentWeapon->playMuzzleFlash();
 
 #if !UE_BUILD_SHIPPING
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 2.f, 0, 2.f);
