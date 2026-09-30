@@ -11,6 +11,8 @@
 #include "Components/HealthComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Animation/AnimMontage.h"
+#include "GameFramework/Character.h"
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -193,7 +195,7 @@ void AWeaponBase::OnRep_Equipped()
 
 void AWeaponBase::Reload_Implementation()
 {
-	if (!WeaponData) { return; }
+	if (!WeaponData || WeaponData->ReloadDuration <= 0.f) { return; }
 	if (bReloading) { return; }
 	if (CurrentAmmo == WeaponData->MagazineSize) { return; }
 	if (!GetWorld()) { return; }
@@ -206,7 +208,8 @@ void AWeaponBase::Reload_Implementation()
 
 	bReloading = true;
 	UE_LOG(LogTemp, Display, TEXT("Reloading..."));
-	//假设播放换弹动画，暂无
+	OnRep_Reloading();//服务器端自己播放一遍因为不走客户端状态复制
+
 	GetWorld()->GetTimerManager().SetTimer(
 		ReloadTimer,
 		this,
@@ -222,7 +225,27 @@ void AWeaponBase::ReloadCompleted()
 	if (!WeaponData) { return; }
 	CurrentAmmo = WeaponData->MagazineSize;
 	bReloading = false;
+	OnRep_Reloading();//停止播放换弹动画
 	UE_LOG(LogTemp, Display, TEXT("Reloaded"));
+}
+
+void AWeaponBase::OnRep_Reloading()
+{
+	if (!WeaponData || !WeaponData->ReloadMontage) { return; }
+
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter){return;}
+
+	UAnimMontage* ReloadMontage = WeaponData->ReloadMontage;//从武器数据资产驱动换弹Montage
+
+	if (bReloading) //进入正在换弹状态时
+	{
+		if (WeaponData->ReloadDuration <= 0.f){return;}
+
+		const float MontagePlaySpeed = ReloadMontage->GetPlayLength() / WeaponData->ReloadDuration;//换弹动画播放速度=动画时间长度 / 换弹时间
+		OwnerCharacter->PlayAnimMontage(ReloadMontage, MontagePlaySpeed);//角色真正播放换弹动画
+	}
+	else { OwnerCharacter->StopAnimMontage(ReloadMontage); }//false的时候停止换弹montage
 }
 
 void AWeaponBase::CancelReload_Implementation()
@@ -230,6 +253,7 @@ void AWeaponBase::CancelReload_Implementation()
 	if (!GetWorld()) { return; }
 	GetWorldTimerManager().ClearTimer(ReloadTimer);
 	bReloading = false;
+	OnRep_Reloading();//停止播放换弹动画
 }
 
 // Called every frame

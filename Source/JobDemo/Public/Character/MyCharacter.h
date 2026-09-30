@@ -13,6 +13,7 @@ class UHealthComponent;
 class AWeaponBase;
 class UWeaponComponent;
 class USoundBase;
+class UAnimMontage;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter
 {
@@ -44,6 +45,8 @@ public:
 
 
 	void SetSprint(bool IsSprinting);//本体客户端奔跑意图
+
+	
 protected:
 	// 改成网络请求
 	UFUNCTION(Server, Reliable)
@@ -108,4 +111,6 @@ public:
 	float ShootRange = 2000.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
 	float Damage = 25.f;
+
+
 };

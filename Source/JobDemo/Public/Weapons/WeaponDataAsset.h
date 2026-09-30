@@ -8,7 +8,7 @@
 
 class USoundBase;
 class UNiagaraSystem;
-
+class UAnimMontage;
 UCLASS()
 class JOBDEMO_API UWeaponDataAsset : public UDataAsset
 {
@@ -47,4 +47,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Effects")
     FName MuzzleSocketName = TEXT("Muzzle");
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Animation")
+    TObjectPtr<UAnimMontage>ReloadMontage = nullptr;
 };

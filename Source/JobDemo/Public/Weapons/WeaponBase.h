@@ -63,12 +63,12 @@ protected:
 	float PreviousShotTime=-1.0f;//记录距离上一发开火时间
 
 	//换弹
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing= OnRep_Reloading)
 	bool bReloading = false;
 	FTimerHandle ReloadTimer;
 	void ReloadCompleted();
-
-
+	UFUNCTION()
+	void OnRep_Reloading();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -83,4 +83,6 @@ public:
 	void CancelReload();
 
 	void SetWeaponVisibility(bool bVisible);//武器显示或者隐藏自己的mesh
+
+	bool IsReloading() const { return bReloading; }
 };
