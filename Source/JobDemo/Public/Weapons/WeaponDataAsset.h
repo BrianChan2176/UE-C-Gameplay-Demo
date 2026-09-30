@@ -50,4 +50,11 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Animation")
     TObjectPtr<UAnimMontage>ReloadMontage = nullptr;
+
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat")
+    float VerticalRecoilStrength = 1.f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat")
+    float HorizontalRecoilStrength = 1.f;
 };

@@ -374,6 +374,25 @@ void AMyCharacter::MulticastPlayShootEffects_Implementation(FVector TraceStart, 
 	if (!CurrentWeapon) { return; }
 	CurrentWeapon->playMuzzleFlash();
 
+	//简单后坐力
+	if (IsLocallyControlled())// 只改变开枪者自己的视角
+	{
+		APlayerController* PC =Cast<APlayerController>(GetController());
+
+		if (PC && PC->PlayerCameraManager)
+		{
+			FRotator ViewRotation = PC->GetControlRotation();
+
+			// 每枪根据枪的垂直后坐力上抬镜头
+			ViewRotation.Pitch += CurrentWeapon->GetWeaponData()->VerticalRecoilStrength;
+
+			// 每枪随机根据水平后坐力，左右偏镜头
+			ViewRotation.Yaw += FMath::FRandRange(-CurrentWeapon->GetWeaponData()->HorizontalRecoilStrength, CurrentWeapon->GetWeaponData()->HorizontalRecoilStrength);
+
+			PC->SetControlRotation(ViewRotation);
+		}
+	}
+
 #if !UE_BUILD_SHIPPING
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 2.f, 0, 2.f);
 	if (bHitted)
