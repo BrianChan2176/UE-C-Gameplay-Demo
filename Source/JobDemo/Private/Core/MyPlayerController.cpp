@@ -204,7 +204,7 @@ void AMyPlayerController::SetupInputComponent()
 
 	if (IA_Shoot)
 	{
-		EnhancedInputComponent->BindAction(IA_Shoot, ETriggerEvent::Started, this, &AMyPlayerController::Shoot);
+		EnhancedInputComponent->BindAction(IA_Shoot, ETriggerEvent::Triggered, this, &AMyPlayerController::Shoot);
 	}
 
 	if (IA_Reload)
