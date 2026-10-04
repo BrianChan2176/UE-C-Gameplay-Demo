@@ -18,6 +18,9 @@
 #include "Weapons/WeaponDataAsset.h"
 #include "Core/MyGameInstance.h"
 #include "Sound/SoundBase.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayAbilitySpec.h"
+#include "GAS/GA_Fireball.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -43,6 +46,13 @@ AMyCharacter::AMyCharacter()
 
 	WeaponComponent= CreateDefaultSubobject <UWeaponComponent>(TEXT("WeaponComponent"));
 	WeaponComponent->SetWeaponAttachPoint(WeaponAttachPoint);
+
+	//GAS
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+
+	FireballAbilityClass = UGA_Fireball::StaticClass();
+
 }
 
 
@@ -73,7 +83,29 @@ void AMyCharacter::BeginPlay()
 		HealthComponent->OnDeath.AddDynamic(this,&AMyCharacter::HandleDeath);
 	}
 
+	//初始化ASC，服务器授予技能
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
+	if (HasAuthority()&& FireballAbilityClass)
+	{
+		AbilitySystemComponent->GiveAbility(
+			FGameplayAbilitySpec(FireballAbilityClass, 1, INDEX_NONE, this)
+		);
+	}
+}
+
+void AMyCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+}
+
+void AMyCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 void AMyCharacter::HandleDeath()
@@ -264,6 +296,20 @@ void AMyCharacter::SetSprint(bool IsSprinting)
 		ServerSprint(IsSprinting);//服务器再修改和验证移速
 	}
 
+}
+
+UAbilitySystemComponent* AMyCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void AMyCharacter::CastFireball()
+{
+	if (!IsLocallyControlled()) { return; }
+	if (!HealthComponent || HealthComponent->IsDead()) { return; }
+	if (!AbilitySystemComponent || !FireballAbilityClass) { return; }
+
+	AbilitySystemComponent->TryActivateAbilityByClass(FireballAbilityClass,true);
 }
 
 void AMyCharacter::ServerSprint_Implementation(bool IsSprinting)

@@ -216,6 +216,11 @@ void AMyPlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(IA_SwitchWeapon, ETriggerEvent::Started, this, &AMyPlayerController::SwitchWeapon);
 	}
+
+	if (IA_Fireball)
+	{
+		EnhancedInputComponent->BindAction(IA_Fireball,ETriggerEvent::Started,this,&AMyPlayerController::CastFireball);
+	}
 }
 
 void AMyPlayerController::TryInteract()
@@ -367,4 +372,12 @@ void AMyPlayerController::SwitchWeapon(const FInputActionValue& Value)
 	UWeaponComponent* CharacterWeaponComponent = GetPawn()->FindComponentByClass<UWeaponComponent>();
 	if (!CharacterWeaponComponent) { return; }
 	CharacterWeaponComponent->ServerSwitchWeapons();
+}
+
+void AMyPlayerController::CastFireball(const FInputActionValue& Value)
+{
+	AMyCharacter* PlayerCharacter = Cast<AMyCharacter>(GetPawn());
+	if (!PlayerCharacter) { return; }
+
+	PlayerCharacter->CastFireball();
 }

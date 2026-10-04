@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
 #include "MyCharacter.generated.h"
 class USpringArmComponent;
 class UCameraComponent;
@@ -14,8 +15,10 @@ class AWeaponBase;
 class UWeaponComponent;
 class USoundBase;
 class UAnimMontage;
+class UAbilitySystemComponent;
+class UGameplayAbility;
 UCLASS()
-class JOBDEMO_API AMyCharacter : public ACharacter
+class JOBDEMO_API AMyCharacter : public ACharacter,public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -43,11 +46,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ShootDamage();//客户端本地射击意图
 
-
 	void SetSprint(bool IsSprinting);//本体客户端奔跑意图
 
-	
+	//GAS
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent()const override;
+
+	void CastFireball();//施法入口
+
 protected:
+	//GAS
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	TObjectPtr<UAbilitySystemComponent>AbilitySystemComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "GAS")
+	TSubclassOf<UGameplayAbility>FireballAbilityClass;
+
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_Controller() override;
+
 	// 改成网络请求
 	UFUNCTION(Server, Reliable)
 	void ServerShoot(FVector ClientTraceStart,FVector ClientDirection);//客户端发送请求，服务器执行 请求_Implementation 判断合法性

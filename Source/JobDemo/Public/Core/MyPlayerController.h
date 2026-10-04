@@ -74,6 +74,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TObjectPtr<UInputAction>IA_SwitchWeapon;
 
+	UPROPERTY(EditDefaultsOnly, Category = "GAS")
+	TObjectPtr<UInputAction> IA_Fireball;
+
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Combat")
 	TSubclassOf<UUserWidget>CrosshairWidgetClass;
@@ -137,6 +140,7 @@ private:
 	void Shoot(const FInputActionValue& Value);
 	void Reload(const FInputActionValue& Value);
 	void SwitchWeapon(const FInputActionValue& Value);
+	void CastFireball(const FInputActionValue& Value);
 
 
 	FTimerHandle RewardTimer;

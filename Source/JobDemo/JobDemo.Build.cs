@@ -12,7 +12,10 @@ public class JobDemo : ModuleRules
 			"AIModule",
 			"NavigationSystem",
 			"GameplayTasks",
-            "Niagara"});
+            "Niagara",
+			"GameplayAbilities",
+			"GameplayTags"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {    "Slate","SlateCore"  });
 
