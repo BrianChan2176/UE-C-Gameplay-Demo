@@ -6,9 +6,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "GA_Fireball.generated.h"
 
-/**
- * 
- */
+class AFireballProjectile;
 UCLASS()
 class JOBDEMO_API UGA_Fireball : public UGameplayAbility
 {
@@ -21,4 +19,7 @@ protected:
 		const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData)override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Fireball")
+	TSubclassOf<AFireballProjectile>FireballProjectileClass;
 };

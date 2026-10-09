@@ -206,9 +206,9 @@ void AWeaponBase::Reload_Implementation()
 	const UHealthComponent* Health =WeaponOwner->FindComponentByClass<UHealthComponent>();
 	if (!Health || Health->IsDead()) { return; }
 
-	bReloading = true;
+	bReloading = true;//进入换弹状态，客户端执行OnRep_Reloading播发动画
 	UE_LOG(LogTemp, Display, TEXT("Reloading..."));
-	OnRep_Reloading();//服务器端自己播放一遍因为不走客户端状态复制
+	OnRep_Reloading();//播放动画，服务器端自己播放一遍因为不走客户端状态复制
 
 	GetWorld()->GetTimerManager().SetTimer(
 		ReloadTimer,
