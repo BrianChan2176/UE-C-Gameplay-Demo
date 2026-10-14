@@ -21,6 +21,7 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySpec.h"
 #include "GAS/GA_Fireball.h"
+#include "GAS/MyAttributeSet.h"
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -53,6 +54,7 @@ AMyCharacter::AMyCharacter()
 
 	FireballAbilityClass = UGA_Fireball::StaticClass();
 
+	CharacterAttributes =CreateDefaultSubobject<UMyAttributeSet>(TEXT("CharacterAttributes"));
 }
 
 

@@ -17,6 +17,7 @@ class USoundBase;
 class UAnimMontage;
 class UAbilitySystemComponent;
 class UGameplayAbility;
+class UMyAttributeSet;
 UCLASS()
 class JOBDEMO_API AMyCharacter : public ACharacter,public IAbilitySystemInterface
 {
@@ -62,6 +63,9 @@ protected:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Controller() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	TObjectPtr<UMyAttributeSet> CharacterAttributes;
 
 	// 改成网络请求
 	UFUNCTION(Server, Reliable)
