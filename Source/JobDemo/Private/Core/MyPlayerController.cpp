@@ -25,6 +25,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "AbilitySystemComponent.h"
 #include "GAS/MyAttributeSet.h"
+#include "GameplayEffect.h"
+#include "GameplayTagContainer.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -175,6 +177,15 @@ void AMyPlayerController::BeginPlay()
 		if (ManaWidget)
 		{
 			ManaWidget->AddToViewport();
+		}
+	}
+
+	if (FireballWidgetClass)
+	{
+		FireballWidget = CreateWidget<UUserWidget>(this, FireballWidgetClass);
+		if (FireballWidget)
+		{
+			FireballWidget->AddToViewport();
 		}
 	}
 }
@@ -359,6 +370,47 @@ float AMyPlayerController::GetManaPercent() const
 	}
 
 	return FMath::Clamp(CurrentMana / MaxMana, 0.f, 1.f);
+}
+
+FText AMyPlayerController::GetFireballCooldownText() const
+{
+	const FText CooldownText =FText::FromString(TEXT(""));
+
+	// 1. 找到自己的角色
+	const AMyCharacter* PlayerCharacter =Cast<AMyCharacter>(GetPawn());
+	if (!IsValid(PlayerCharacter)){return CooldownText;}
+
+	// 2. 取得角色的 ASC
+	const UAbilitySystemComponent* PlayerASC =PlayerCharacter->GetAbilitySystemComponent();
+	if (!IsValid(PlayerASC)){return CooldownText;}
+
+	// 3. 取得项目中已经注册的火球冷却标签
+	const FGameplayTag FireballCooldownTag=FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Fireball")), false);
+	if (!FireballCooldownTag.IsValid()){return CooldownText;}
+
+	// 4. 查询授予这个标签的活动 GE
+	FGameplayTagContainer CooldownTags;//创建标签容器
+	CooldownTags.AddTag(FireballCooldownTag);//添加标签
+	const FGameplayEffectQuery CooldownQuery =FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(CooldownTags);//创建GE 查询规则，匹配火球冷却Tag
+	const TArray<float> RemainingTimes =PlayerASC->GetActiveEffectsTimeRemaining(CooldownQuery);//剩下时间放进数组里
+
+	// 查询可能匹配多个效果，取最长的剩余时间
+	float RemainingTime = 0.f;
+
+	for (const float EffectRemainingTime : RemainingTimes)
+	{
+		RemainingTime = FMath::Max(RemainingTime, EffectRemainingTime);
+	}
+
+	// 5. 有有效剩余时间，显示倒计时
+	if (RemainingTime > 0.f)
+	{
+		const float DisplayTime =FMath::Max(RemainingTime, 0.1f);// 避免最后一瞬间四舍五入显示成 0.0
+		return FText::FromString(FString::Printf(TEXT("%.1f s"),DisplayTime));
+	}
+
+
+	return CooldownText;
 }
 
 

@@ -47,13 +47,14 @@ public:
 	void FlashHitMakerWithSound();
 
 	//GAS蓝条蓝量
-	UFUNCTION(BlueprintPure, Category = "GAS")
+	UFUNCTION(BlueprintPure, Category = "UI|GAS")
 	FText GetManaText()const;
 
-	UFUNCTION(BlueprintPure, Category = "GAS")
+	UFUNCTION(BlueprintPure, Category = "UI|GAS")
 	float GetManaPercent()const;
 	
-
+	UFUNCTION(BlueprintPure, Category = "UI|GAS")
+	FText GetFireballCooldownText() const;
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -136,6 +137,13 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget>ManaWidget;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget>FireballWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget>FireballWidget;
 protected:
 	virtual void BeginPlay()override;
 
