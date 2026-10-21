@@ -1,340 +1,332 @@
-# UE5 C++基础网络多人闯关 Gameplay Demo
+# UE5 C++ 多人闯关 Gameplay Demo
 
 基于 **Unreal Engine 5.7 和 C++** 开发的第三人称多人 Gameplay Demo。
 
-项目围绕双武器拾取与切换、射击与换弹、战斗反馈、AI 敌人、钥匙开门、生命与死亡、多人闯关、局内成长、胜利和重开构建基础玩法流程，重点展示 **C++ Gameplay 开发、组件化设计、数据驱动武器、AI 行为以及服务器权威网络同步**。
+项目围绕双武器拾取与切换、射击与换弹、GAS 火球技能、AI 战斗、钥匙开门、三关连续闯关、局内成长和重开构建玩法流程。
 
-核心 Gameplay 逻辑使用 C++ 实现，Blueprint 用于资源配置、角色外观、动画蓝图及 UMG 界面布局与绑定。
+重点展示 **C++ Gameplay 开发、组件化设计、数据驱动武器、GAS 基础接入、AI 行为以及服务器权威网络同步**。
 
-[观看演示视频](https://www.bilibili.com/video/BV15cYN69Eu8/) · [下载 Windows 版本](https://pan.baidu.com/s/1BEo2dxvLlXKnzFMdm7Vbuw?pwd=1234)
+核心 Gameplay 逻辑使用 C++ 实现，Blueprint 用于资源配置、GameplayEffect 配置、角色外观、动画蓝图及 UMG 界面布局与绑定。
+
+[观看演示视频](https://www.bilibili.com/video/BV1umni6zE9r/) · [下载 Windows 版本](https://pan.baidu.com/s/178cIum6VtKv1djhs2hWzKw?pwd=1234)
+
+> 本文说明对应当前 main 分支源码；演示视频和下载包展示的功能以各自版本为准。
 
 ## Gameplay
 
-* 使用第三人称角色移动、跳跃、冲刺和探索场景。
-* 拾取手枪与步枪，最多持有两把武器，并使用 `Q` 切换当前武器。
-* 射击消耗当前武器的弹药，并受射击冷却限制；使用 `R` 换弹，换弹期间不能射击。
-* 成功开火后播放对应武器的枪声、Niagara 枪口特效和简单后坐力。
-* 命中存活的生命组件目标时，向射手显示短暂命中标记并播放提示音。
-* 换弹状态驱动 Montage 播放，切枪或死亡时取消换弹。
-* 拾取钥匙后，全队共享开门权限。
-* 敌人执行固定点巡逻或随机巡逻、视觉感知、追击和近距离攻击。
-* 每关可随机生成一定数量的敌人。
-* 当前关卡敌人全部死亡后，由服务器推进至下一关。
-* 支持 `NewWorld → LevelTwo → LevelThree` 三关连续闯关流程。
-* 每通过一关，玩家本局伤害倍率提升。
-* 第一、第二关完成后向各客户端显示通关奖励提示。
-* 第三关完成后向各客户端显示最终胜利界面。
-* 玩家死亡后显示重开界面。
-* 通过服务器统一重载关卡，重新开始游戏并重置本局成长。
+- 第三人称移动、跳跃、冲刺与场景探索。
+- 拾取手枪与步枪，最多持有两把武器，通过 `Q` 切换。
+- 按住鼠标左键持续尝试射击，实际开火频率受武器射击冷却限制。
+- 射击消耗弹药，通过 `R` 换弹；换弹期间不能射击，切枪或死亡时取消换弹。
+- 按 `1` 释放 GAS 火球技能，消耗蓝量并进入冷却。
+- UI 显示当前蓝量、蓝量进度条及火球冷却剩余时间。
+- AI 敌人执行巡逻、视觉感知、追击、近距离攻击与目标切换。
+- 任意玩家拾取钥匙后，全队共享当前关卡的开门权限。
+- 清空当前关卡敌人后，由服务器统一推进至下一关。
+- 支持 `NewWorld → LevelTwo → LevelThree → Victory` 三关流程。
+- 每通过一关提升本局枪械伤害倍率，并向玩家发送通关奖励提示。
+- 玩家死亡后显示重开界面；重开时统一返回第一关并重置本局成长。
 
 ## Features
 
-### 多人闯关与局内成长
+### GAS 火球技能
 
-在原有多人战斗流程基础上加入三关连续闯关和简单的 Roguelite 局内成长机制。
+以火球术接入 Gameplay Ability System，串联技能授予、激活、消耗、冷却、弹体生成和 UI 展示。
 
-关卡流程：
+| 组成 | 当前职责 |
+| --- | --- |
+| `UAbilitySystemComponent` | 管理角色技能、GameplayEffect 与属性访问 |
+| `UGA_Fireball` | 检查施法条件、提交消耗与冷却、生成火球弹体 |
+| `GE_FireballCost` | 配置火球的蓝量消耗，当前示例为每次 20 点 |
+| `GE_FireballCooldown` | 配置火球冷却，当前示例为 3 秒 |
+| `Cooldown.Fireball` | 标识火球冷却状态，并用于查询对应活动效果 |
+| `UMyAttributeSet` | 保存、复制和限制 `Mana`、`MaxMana` |
+| `AFireballProjectile` | 服务器飞行模拟、碰撞检测、伤害结算与销毁 |
 
-`NewWorld → LevelTwo → LevelThree → Victory`
+技能执行流程：
 
-* `GameMode` 在服务器统计当前关卡剩余敌人。
-* 当前关卡敌人全部死亡后，根据当前地图决定下一阶段。
-* 第一关结束后通过 `ServerTravel` 进入 `LevelTwo`。
-* 第二关结束后进入 `LevelThree`。
-* 第三关结束后遍历所有 PlayerController，通过 Client RPC 向各客户端显示最终胜利 UI。
-* 多人关卡切换由服务器统一控制，保证所有玩家进入相同关卡。
+1. `AMyPlayerController` 接收 `IA_Fireball` 输入。
+2. 调用 `AMyCharacter::CastFireball()`。
+3. 角色通过 ASC 的 `TryActivateAbilityByClass()` 请求激活技能。
+4. `UGA_Fireball` 在服务器检查施法角色、存活状态与弹体配置。
+5. 调用 `CommitAbility()`，检查并提交技能消耗与冷却。
+6. 提交成功后，由服务器生成火球弹体。
+7. 技能结束，已生成的弹体继续独立飞行和处理命中。
 
-### 随机敌人生成与巡逻
+实现要点：
 
-新增 `AAISpawner` 用于关卡中的随机敌人生成。
+- 角色实现 `IAbilitySystemInterface`，提供统一的 ASC 访问入口。
+- ASC 与 AttributeSet 创建在角色上。
+- 在 `BeginPlay`、`PossessedBy` 和 `OnRep_Controller` 中初始化或刷新 Ability Actor Info。
+- 技能由服务器通过 `GiveAbility()` 授予。
+- 火球技能使用 `InstancedPerActor` 实例化策略与 `ServerOnly` 网络执行策略。
+- 冷却未结束、蓝量不足或角色死亡时，技能不能正常完成释放。
+- 蓝图负责配置火球技能使用的弹体类、消耗效果与冷却效果。
 
-* 每局在指定 `BoxComponent` 范围内随机生成敌人。
-* 当前生成数量范围为 `3 ~ 6`。
-* 随机选择生成区域内的 X / Y 坐标。
-* 通过向下射线检测地面位置后生成 AI。
-* 新生成敌人继续使用原有 AI 感知、追击和攻击逻辑。
+### 火球弹体与伤害
 
-AI 同时支持两种巡逻方式：
+火球使用独立 Actor，分离技能激活与弹体生命周期。
 
-* 如果配置了巡逻点，则按照 Patrol Points 定点巡逻。
-* 如果没有配置巡逻点，则通过 NavMesh 使用 `GetRandomReachablePointInRadius` 随机寻找可达位置巡逻。
-* 当 AI 进入追击状态后停止随机巡逻逻辑。
-* 丢失目标或没有存活目标时恢复巡逻状态。
+- `SphereComponent` 负责碰撞检测，模型组件负责外观。
+- `ProjectileMovementComponent` 负责飞行，默认速度为 `1000 cm/s`，不受重力影响。
+- 发射方向使用服务器掌握的角色瞄准朝向。
+- 生成时设置 `Owner` 与 `Instigator`，移动时忽略施法者。
+- 服务器模拟飞行与碰撞，客户端接收 Actor 移动复制。
+- 客户端关闭弹体移动组件和碰撞，避免重复模拟与伤害结算。
+- 使用 `bHasHit` 防止同一颗火球重复结算命中。
+- 命中后由服务器调用 `ApplyDamage()`，随后销毁弹体。
+- 未命中的弹体在 3 秒后自动清理。
 
-### 局内伤害成长
+当前 `DamageAmount` 的 C++ 默认值为 `70`，可在弹体蓝图中调整。
 
-新增自定义 `UMyGameInstance` 保存跨关卡的本局成长数据。
+火球伤害接入现有的 `UHealthComponent`。当前 GAS 负责技能激活、蓝量与冷却，生命值和受伤流程仍由原有生命组件处理。
 
-初始伤害倍率：
+### 蓝量与火球冷却 UI
 
-`DamageMultiplier = 1.0`
+蓝量 UI 从当前角色实际使用的 AttributeSet 读取数据。
 
-每通过一关：
+- `Mana` 与 `MaxMana` 初始值均为 `100`。
+- 使用属性复制与 `GAMEPLAYATTRIBUTE_REPNOTIFY` 同步蓝量。
+- GameplayEffect 修改蓝量后，通过 `PostGameplayEffectExecute()` 将数值限制在 `0 ~ MaxMana`。
+- `GetManaText()` 提供“当前蓝量 / 最大蓝量”文本。
+- `GetManaPercent()` 提供 `0 ~ 1` 的进度条比例。
+- `WBP_ManaWidget` 用于蓝量展示，`WBP_Fireball` 用于技能与冷却展示。
 
-`DamageMultiplier += 1.2`
+火球冷却提示读取 ASC 中对应 GameplayEffect 的实际剩余时间：
 
-实际射击伤害：
+1. 获取 `Cooldown.Fireball` 标签。
+2. 使用 `MakeQuery_MatchAnyOwningTags()` 构建活动效果查询。
+3. 通过 `GetActiveEffectsTimeRemaining()` 获取剩余时间。
+4. 如果匹配多个效果，取最长的剩余时间。
+5. 冷却期间显示一位小数的秒数；冷却结束后清空倒计时文本。
 
-`FinalDamage = WeaponDamage × DamageMultiplier`
+UI 不单独维护一套冷却计时器，显示内容来自角色当前的活动效果。
 
-例如步枪基础伤害为 `30`：
+### 数据驱动武器与双武器切换
 
-|关卡|伤害倍率|实际伤害|
-|-|-:|-:|
-|第一关|1.0|30|
-|第二关|2.2|66|
-|第三关|3.4|102|
-
-由于 `GameInstance` 在关卡切换过程中不会重新创建，因此可以保存当前 Run 的成长状态。
-
-玩家重新开始游戏时调用 `ResetRun()`，将伤害倍率恢复为 `1.0`。
-
-### 通关奖励反馈
-
-第一关和第二关完成后，服务器向所有玩家发送通关奖励提示。
-
-* `GameMode` 遍历当前所有 PlayerController。
-* 通过 `ClientReward` Client RPC 通知对应客户端。
-* 本地 `PlayerController` 显示 `RewardWidget`。
-* Reward UI 显示约 `2.5` 秒后自动隐藏。
-* 第三关结束后不再显示过关提示，而是进入最终 Victory UI。
-
-当前 Reward UI 主要用于表现局内成长结果，成长逻辑目前为固定伤害倍率提升。
-
-### 数据驱动武器
-
-通过 `UWeaponDataAsset` 配置武器，区分静态配置与运行时状态。
+通过 `UWeaponDataAsset` 区分武器静态配置与实例运行状态。
 
 | 配置项 | 用途 |
 | --- | --- |
-| `GunName` | 武器名称 |
-| `Damage` | 单次命中基础伤害 |
-| `MaxRange` | 射击距离 |
+| `GunName`、`GunMesh` | 武器名称与模型 |
+| `Damage`、`MaxRange` | 基础伤害与射程 |
 | `MagazineSize` | 弹匣容量 |
-| `GunMesh` | 武器模型 |
 | `ShootCD` | 两次有效射击之间的最小间隔 |
-| `ReloadDuration` | 换弹耗时 |
+| `ReloadDuration`、`ReloadMontage` | 换弹时间与动画 |
 | `FireSound` | 开火声音 |
-| `MuzzleFlash` | Niagara 枪口特效 |
-| `MuzzleSocketName` | 枪口特效附着的 Socket 名称 |
-| `ReloadMontage` | 换弹动画 Montage |
-| `VerticalRecoilStrength` | 每枪垂直后坐力强度 |
-| `HorizontalRecoilStrength` | 每枪随机水平后坐力范围 |
+| `MuzzleFlash`、`MuzzleSocketName` | Niagara 枪口特效与挂点 |
+| `VerticalRecoilStrength`、`HorizontalRecoilStrength` | 垂直与水平后坐力 |
 
-* 提供手枪与步枪的 DataAsset 配置示例。
-* `AWeaponBase` 读取配置，初始化模型和弹药；弹药、射击时间和换弹状态保存在武器实例中。
-* 武器实现 `IInteractable`，接入统一交互流程。
-* `UWeaponComponent` 管理当前武器、备用武器与角色挂点，最多持有两把武器。
-* 服务器完成武器装备，设置归属并附着到角色；备用武器隐藏模型。
-* 切枪时由服务器交换两个武器引用，并同步当前武器与备用武器的显示状态。
-* 射击时读取当前武器的伤害与射程，检查弹药、射击冷却和换弹状态，通过后扣除弹药。
-* 基础武器伤害会结合当前 Run 的 `DamageMultiplier` 计算最终伤害。
-* 弹药 UI 显示当前武器的“剩余弹药 / 弹匣容量”，未持枪时显示“未装备”。
+- 提供手枪与步枪的 DataAsset 配置示例。
+- `AWeaponBase` 保存弹药、上次开火时间和换弹状态。
+- `UWeaponComponent` 管理当前武器、备用武器与角色挂点。
+- 武器实现 `IInteractable`，接入统一交互流程。
+- 服务器完成装备、设置归属并将武器附着到角色。
+- 最多持有两把武器，备用武器隐藏模型。
+- 切枪时服务器交换两个武器引用，客户端通过 RepNotify 更新模型显示。
+- 弹药 UI 根据当前武器实例与 DataAsset 显示“剩余弹药 / 弹匣容量”。
 
-### 换弹与动画表现
+### 连续射击与换弹
 
-换弹由服务器管理状态和完成时间，动画跟随换弹状态播放。
+射击输入使用 Enhanced Input 的 `Triggered` 回调，按住鼠标左键可持续提交射击请求。
 
-* 玩家通过武器的 `Reload` Server RPC 请求换弹。
-* 服务器检查武器配置、换弹时长、弹匣状态及持有者是否存活；满弹匣或已经在换弹时不重复开始。
-* 开始换弹后设置 `bReloading = true`，并通过 Timer 等待 `ReloadDuration`。
-* `bReloading` 使用 `ReplicatedUsing = OnRep_Reloading`，客户端收到状态后播放或停止角色的换弹 Montage。
-* 服务器修改状态后也调用 `OnRep_Reloading()`，处理服务器端的动画表现。
-* Montage 播放速率按 `动画长度 / ReloadDuration` 计算，使动画时长与配置的换弹时间对应。
-* 换弹完成后，服务器将当前弹药补满到弹匣容量，并结束换弹状态。
-* 换弹期间禁止射击；切枪或死亡时调用 `CancelReload()`，清除换弹计时器并结束动画表现。
+- 每次有效开火由服务器检查武器归属、弹药、射击冷却与换弹状态。
+- 通过检查后扣除弹药、执行射线检测并结算伤害。
+- 实际射速由 `ShootCD` 限制。
 
-当前采用计时换弹，完成时间由服务器 Timer 决定；尚未设置备用弹药库存。
+换弹由服务器管理状态和完成时间：
+
+- 玩家通过 `Reload` Server RPC 请求换弹。
+- 满弹匣、正在换弹或角色死亡时，不开始新的换弹。
+- 服务器设置 `bReloading`，并使用 Timer 等待 `ReloadDuration`。
+- `bReloading` 通过 RepNotify 驱动客户端播放或停止换弹 Montage。
+- 服务器修改状态后同步执行自身的动画更新。
+- Montage 播放速率根据动画长度与换弹时间计算。
+- 换弹完成后，将当前弹药补满至弹匣容量。
+- 切枪或死亡时，通过 `CancelReload()` 清除计时器并结束换弹表现。
+
+当前采用计时换弹，尚未设置备用弹药库存。
 
 ### 战斗反馈
 
 | 反馈 | 实现方式 |
 | --- | --- |
-| 开火声音 | 成功开火后通过 `MulticastPlayShootEffects`，在武器位置播放 DataAsset 配置的声音 |
-| 枪口特效 | `AWeaponBase::playMuzzleFlash()` 将 Niagara 特效附着到武器的枪口 Socket |
-| 命中标记与声音 | 服务器检测到命中带生命组件的存活目标后，通过射手 PlayerController 的 Client RPC 显示标记并播放 2D 提示音 |
-| 换弹动画 | 复制换弹状态，通过 `OnRep_Reloading()` 驱动角色播放或停止 Montage |
-| 简单后坐力 | 开枪者本地修改 `ControlRotation`，叠加垂直上抬和随机水平偏移 |
+| 枪声 | 服务器成功开火后，通过 NetMulticast 播放武器配置的声音 |
+| 枪口特效 | 将 Niagara 特效附着到武器枪口 Socket |
+| 枪械命中标记与提示音 | 服务器确认命中带生命组件的存活目标后，通过 Client RPC 通知射手 |
+| 换弹动画 | 根据复制的换弹状态播放或停止 Montage |
+| 简单后坐力 | 仅由本地控制的角色修改自己的视角 |
 | 死亡表现 | 生命组件广播死亡事件，角色停止移动并进入 Ragdoll |
 
-* 命中标记显示约 `0.1` 秒，连续命中时刷新隐藏计时器。
-* 后坐力通过 `IsLocallyControlled()` 限制为只影响开枪者自己的视角。
-* 枪声、枪口特效、换弹动画和后坐力参数均可按武器配置。
-* 射击表现从服务器成功开火后的流程触发；空弹匣、射击冷却未结束或正在换弹时不会触发新的开火表现。
-* 射线和命中点的调试绘制仅在非 Shipping 构建中启用。
+- 命中标记显示约 `0.1` 秒，连续命中时刷新隐藏计时器。
+- 后坐力由垂直上抬与随机水平偏移组成。
+- 枪械射线及命中点的调试绘制仅在非 Shipping 构建中启用。
 
-### AI 与战斗
+### AI 与随机生成
 
-* 使用 `AIController`、导航移动和 Timer 实现定点巡逻与随机巡逻。
-* 使用 `AI Perception` 视觉感知发现玩家。
-* 根据目标距离执行追击或近距离攻击，通过 Timer 控制攻击冷却。
-* 当前目标丢失或被判断为死亡时，尝试寻找其他可见且存活的玩家。
-* 没有可用目标时恢复巡逻。
-* 玩家和敌人共用 `UHealthComponent`，统一处理伤害、生命值和死亡事件。
-* 使用动态多播委托通知血条更新与死亡表现。
-* 玩家和敌人死亡后进入 Ragdoll 状态。
-* AI 可由关卡中的 `AAISpawner` 动态生成。
+使用 C++ `AIController`、AI Perception、NavMesh 与 Timer 实现基础敌人行为。
+
+- 配置巡逻点时，按巡逻点移动。
+- 未配置巡逻点时，使用 `GetRandomReachablePointInRadius()` 寻找可达位置。
+- 通过视觉感知发现玩家并进入追击。
+- 根据与目标的距离执行移动或近距离攻击。
+- 使用 Timer 控制攻击冷却。
+- 当前目标丢失或被判断为死亡时，尝试寻找其他可见且存活的玩家。
+- 没有可用目标时恢复巡逻。
+- 玩家和敌人共用 `UHealthComponent`，统一处理受伤、生命值与死亡事件。
+
+`AAISpawner` 在指定 Box 区域内随机选择位置，通过向下射线寻找地面并生成敌人，当前每个生成器的生成数量范围为 `3 ~ 6`。
+
+### 多人闯关与局内成长
+
+关卡流程：
+
+`NewWorld → LevelTwo → LevelThree → Victory`
+
+- `GameMode` 在服务器统计当前关卡敌人数量。
+- 关卡开始后延迟统计，为随机生成流程预留时间。
+- 敌人死亡时通知 `GameMode` 更新剩余数量。
+- 第一、第二关敌人清空后，通过 `ServerTravel` 统一切换地图。
+- 过关时通过 Client RPC 向各玩家发送 Reward UI 通知。
+- 第三关完成后，通过 Client RPC 向各玩家显示最终 Victory UI。
+
+服务器使用 `UMyGameInstance` 保存跨关卡的本局枪械伤害倍率：
+
+| 关卡 | 伤害倍率 |
+| --- | ---: |
+| 第一关 | 1.0 |
+| 第二关 | 2.2 |
+| 第三关 | 3.4 |
+
+枪械最终伤害：
+
+`FinalDamage = WeaponDamage × DamageMultiplier`
+
+每次过关调用 `ApplyDamageUpdate()`，使倍率增加 `1.2`；重开时调用 `ResetRun()`，恢复为 `1.0`。
+
+当前该倍率用于枪械射击伤害，火球使用弹体自身的 `DamageAmount`。
 
 ### 交互与界面
 
-* 使用射线检测选择交互目标并显示提示。
-* 武器、钥匙与门通过 `IInteractable` 提供统一交互入口。
-* 提供血条、准星、交互提示、弹药、命中标记、通关奖励、死亡和胜利界面。
-* 使用 `IsLocallyControlled()` 与 `IsLocalController()` 区分本地输入、界面和网络副本逻辑。
-* 第一、第二关完成后显示 Reward UI。
-* 第三关完成后显示最终 Victory UI。
+- 使用射线检测选择交互目标并显示提示。
+- 武器、钥匙与门通过 `IInteractable` 提供统一交互入口。
+- 任意玩家拾取钥匙后，服务器更新 `GameState` 中的队伍钥匙状态。
+- 服务器验证开门权限，并同步门的开关状态。
+- UI 包括血条、准星、交互提示、弹药、蓝量、火球冷却、命中标记、通关奖励、死亡与胜利界面。
+- 使用 `IsLocallyControlled()` 和 `IsLocalController()` 区分本地输入、界面与网络副本逻辑。
 
 ## Networking
 
 核心玩法采用 **Server Authoritative** 模型：客户端提交操作请求，服务器执行关键判定并同步结果。
 
-### 射击与伤害
+| 系统 | 服务器职责 | 客户端同步与表现 |
+| --- | --- | --- |
+| 枪械射击 | 检查射击条件、扣弹药、射线检测与伤害结算 | 接收弹药、生命值及射击表现 |
+| 武器装备与切换 | 设置归属、附着武器、交换武器引用 | RepNotify 更新碰撞与模型显示 |
+| 换弹 | 管理状态、计时与弹药补充 | 根据复制状态播放 Montage |
+| GAS 火球 | 授予技能、执行技能、提交消耗与冷却、生成弹体 | 接收属性、活动效果及弹体移动 |
+| 生命与死亡 | 修改生命值和死亡状态 | OnRep 广播事件，更新 UI 与 Ragdoll |
+| 钥匙与门 | 验证交互、更新队伍钥匙权限和门状态 | 接收共享状态与场景变化 |
+| 关卡与重开 | 统计敌人、决定关卡推进、重置成长 | 随服务器切换地图，显示本地 UI |
 
-客户端通过 `ServerShoot` 提交射击起点与方向，服务器进行基础检查：
+### 射击请求检查
 
-* 角色是否存活。
-* 射击方向是否为非零向量，并进行标准化处理。
-* 射击起点是否位于服务器角色附近的允许范围内。
-* 当前武器是否有效且属于该角色。
-* 武器配置、射程与剩余弹药是否满足射击条件。
-* 距离上一发有效射击是否达到 `ShootCD`，以及当前是否正在换弹。
+`ServerShoot` 与后续射击流程进行基础校验：
 
-通过检查后，服务器扣除弹药、执行射线检测。
+- 角色是否存活。
+- 射击方向是否为非零向量，并进行标准化。
+- 客户端提交的射击起点是否在服务器允许的角色附近范围内。
+- 当前武器是否有效且属于该角色。
+- 武器配置、射程与弹药是否有效。
+- 射击冷却是否结束，当前是否正在换弹。
 
-基础伤害读取当前武器 DataAsset：
+枪声与枪口特效由 NetMulticast 分发；命中标记与提示音通过 Client RPC 发送给射手；后坐力只影响开枪者自己的视角。
 
-`WeaponDataAsset->Damage`
+### GAS 与弹体复制
 
-然后结合 `GameInstance` 保存的局内成长倍率计算最终伤害：
-
-`FinalDamage = WeaponDataAsset->Damage × DamageMultiplier`
-
-最终由服务器使用 `ApplyDamage` 处理伤害。
-
-射击结果与表现分别处理：
-
-* **生命值与死亡状态**：由服务器修改，通过属性复制同步。
-* **枪声与枪口特效**：服务器成功开火后，通过 `NetMulticast` 在服务器和相关客户端播放。
-* **命中标记与提示音**：服务器检测到命中带生命组件的存活目标后，通过 `FlashHitMakerWithSound` Client RPC 通知射手。
-* **后坐力**：在射击表现回调中，仅由本地控制的角色修改自己的视角。
-* **射线与命中位置的调试表现**：随射击表现同步，在非 Shipping 构建中绘制。
-
-当前射击表现等待服务器确认，尚未加入射击本地预测或延迟补偿。
-
-### 武器、切换与换弹同步
-
-* 武器 Actor 和武器组件开启网络复制。
-* `CurrentWeapon` 与 `BackUpWeapon` 复制当前武器和备用武器引用。
-* 切枪通过 `ServerSwitchWeapons` Server RPC 执行：检查武器与角色状态，取消旧武器换弹，再交换两个引用。
-* 客户端通过 `OnRep_UpdateWeaponsMesh()` 显示当前武器、隐藏备用武器；服务器同步执行自身的显示更新。
-* `CurrentAmmo` 由服务器初始化，在射击或换弹完成后更新，并复制到客户端。
-* `bIsEquipped` 使用 `ReplicatedUsing` 同步装备状态。
-* 客户端通过 `OnRep_Equipped()` 关闭已装备武器的碰撞与物理模拟，避免武器与角色模型重叠时干扰移动。
-* `bReloading` 复制换弹状态，客户端通过 `OnRep_Reloading()` 驱动换弹 Montage。
-* 服务器 Timer 决定何时补满弹匣；`CancelReload` 清除计时器并结束换弹状态。
-* 弹药 UI 从当前武器实例读取剩余弹药，并结合 DataAsset 中的弹匣容量显示文本。
-
-### 交互、钥匙与门
-
-* 客户端通过 `ServerInteract` 请求交互。
-* 服务器检查角色存活状态、目标、接口与交互距离。
-* 任意玩家拾取钥匙后，服务器更新 `AMyGameStateBase::bTeamHasDoorKey`，全队共享开门权限。
-* 钥匙由服务器销毁，并同步 Actor 销毁结果。
-* 服务器检查队伍钥匙权限后切换门状态，同步开关状态与门轴旋转。
-
-### 生命、关卡推进与胜利
-
-* `UHealthComponent` 在服务器处理伤害并修改 `CurrentHealth`、`bIsDead`。
-* 客户端通过 `OnRep` 广播生命值变化与死亡事件，更新界面和角色表现。
-* `GameMode` 在服务器统计当前关卡剩余敌人。
-* 关卡开始后延迟统计敌人数量，等待随机生成流程完成。
-* 敌人死亡时通知 `GameMode` 更新 `RemainingEnemies`。
-* 当前关卡敌人清空后由服务器判断当前地图。
-* 第一关通过 `ServerTravel` 进入第二关。
-* 第二关通过 `ServerTravel` 进入第三关。
-* 第三关完成后通过各玩家的 `ClientVictory` 显示最终胜利界面。
-* 第一、第二关切换前通过 `ClientReward` 显示过关奖励提示。
-
-### 多人关卡切换与重开
-
-多人关卡流程由服务器统一控制：
-
-`NewWorld → LevelTwo → LevelThree`
-
-使用：
-
-`GetWorld()->ServerTravel(...)`
-
-完成服务器和客户端统一关卡切换。
-
-重开按钮调用 `ServerRestart`：
-
-* 服务器将 `GameInstance` 中的局内伤害倍率重置为 `1.0`。
-* 服务器通过 `ServerTravel` 返回 `NewWorld`。
-* 开始新的 Run。
+- ASC 开启复制，当前使用 `Full` GameplayEffect 复制模式。
+- `Mana` 与 `MaxMana` 使用 AttributeSet 属性复制。
+- 火球技能使用 `ServerOnly` 执行策略。
+- 弹体由服务器生成、移动、判定命中并销毁。
+- 客户端根据复制结果显示弹体，并从本地 ASC 查询冷却剩余时间。
 
 ### 移动与冲刺
 
-* 玩家与敌人使用角色移动及网络移动复制。
-* 冲刺输入先在本地修改移动速度，再通过 `ServerSprint` 同步服务器速度，减少输入等待。
+- 玩家与敌人使用 Character Movement 及角色移动复制。
+- 冲刺输入先修改本地移动速度，再通过 `ServerSprint` 请求服务器同步速度。
+
+### 多人重开
+
+重开按钮调用 `ServerRestart`：
+
+1. 服务器重置本局伤害倍率。
+2. 通过 `ServerTravel` 返回 `/Game/Maps/NewWorld`。
+3. 所有玩家开始新一轮闯关。
 
 ## Core Architecture
 
-|类|职责|
-|-|-|
-|`AMyCharacter`|玩家移动、射击与交互执行、Server RPC、最终伤害计算、射击表现广播、本地后坐力、角色死亡表现|
-|`AMyPlayerController`|Enhanced Input 绑定、本地 UI、弹药文本、命中反馈 Client RPC、Reward / Victory 通知与重开请求|
-|`AMyGameModeBase`|服务器敌人数量统计、关卡推进与最终胜利判定|
-|`UMyGameInstance`|保存跨关卡的本局伤害成长倍率与 Run 重置|
-|`AMyGameStateBase`|全队共享钥匙状态复制|
-|`AAISpawner`|在指定区域随机生成敌人|
-|`AEnemyAIController`|定点/随机巡逻、视觉感知、追击、目标切换与攻击冷却|
-|`AEnemyCharacter`|敌人攻击、死亡表现与敌人死亡通知|
-|`UWeaponDataAsset`|武器基础参数、模型、射击冷却、换弹时长、音效、枪口特效、换弹 Montage 与后坐力配置|
-|`AWeaponBase`|武器实例、配置读取、弹药与射击冷却、装备、换弹状态与计时器、枪口特效和换弹动画|
-|`UWeaponComponent`|双武器引用、拾取入口、武器挂点、服务器切枪与模型显示同步|
-|`UHealthComponent`|伤害处理、生命值与死亡状态复制、事件广播|
-|`IInteractable` / `ADoorKey` / `ADoor`|统一交互接口、钥匙拾取与开门|
-|`UHitMakerWidget`|命中标记界面，显示与隐藏由 PlayerController 管理|
-|`URewardWidget`|关卡完成后的局内成长提示|
-|`URestartWidget`|重开按钮绑定与服务器重开请求入口|
+| 类 | 职责 |
+| --- | --- |
+| `AMyCharacter` | 移动、射击与交互执行、Server RPC、ASC 接入、技能激活入口及死亡表现 |
+| `AMyPlayerController` | Enhanced Input、本地 UI、弹药与蓝量查询、冷却查询、客户端反馈与重开请求 |
+| `UGA_Fireball` | 技能条件检查、消耗与冷却提交、火球生成 |
+| `AFireballProjectile` | 弹体飞行、服务器命中、伤害与生命周期 |
+| `UMyAttributeSet` | 蓝量属性、复制与数值限制 |
+| `UWeaponDataAsset` | 武器数值、模型、音效、特效与动画配置 |
+| `AWeaponBase` | 武器实例状态、弹药、射击冷却、装备与换弹 |
+| `UWeaponComponent` | 双武器管理、拾取入口、挂点与切换 |
+| `UHealthComponent` | 受伤、生命值与死亡状态复制、事件广播 |
+| `AEnemyAIController` | 巡逻、感知、追击、目标切换与攻击冷却 |
+| `AEnemyCharacter` | 敌人攻击、死亡表现与死亡通知 |
+| `AAISpawner` | 区域内随机敌人生成 |
+| `AMyGameModeBase` | 服务器敌人统计、关卡推进与胜利判定 |
+| `UMyGameInstance` | 跨关卡局内伤害倍率与 Run 重置 |
+| `AMyGameStateBase` | 队伍钥匙状态复制 |
+| `IInteractable` / `ADoorKey` / `ADoor` | 统一交互、钥匙拾取与门控制 |
 
-主要代码入口：
+### 主要代码入口
 
-* [角色与射击流程](Source/JobDemo/Private/Character/MyCharacter.cpp)
-* [GameMode 与关卡推进](Source/JobDemo/Private/Core/MyGameModeBase.cpp)
-* [GameInstance 与局内成长](Source/JobDemo/Private/Core/MyGameInstance.cpp)
-* [随机敌人生成](Source/JobDemo/Private/AI/AISpawner.cpp)
-* [AI 控制器](Source/JobDemo/Private/AI/EnemyAIController.cpp)
-* [武器配置](Source/JobDemo/Public/Weapons/WeaponDataAsset.h)
-* [武器实例](Source/JobDemo/Private/Weapons/WeaponBase.cpp)
-* [武器组件](Source/JobDemo/Private/Weapons/WeaponComponent.cpp)
-* [生命组件](Source/JobDemo/Private/Components/HealthComponent.cpp)
-* [玩家控制器与 UI](Source/JobDemo/Private/Core/MyPlayerController.cpp)
+- [玩家角色与射击、技能入口](Source/JobDemo/Private/Character/MyCharacter.cpp)
+- [玩家控制器、输入与 UI 查询](Source/JobDemo/Private/Core/MyPlayerController.cpp)
+- [GAS 火球技能](Source/JobDemo/Private/GAS/GA_Fireball.cpp)
+- [火球弹体](Source/JobDemo/Private/GAS/FireballProjectile.cpp)
+- [蓝量属性集](Source/JobDemo/Private/GAS/MyAttributeSet.cpp)
+- [GameplayTag 配置](Config/DefaultGameplayTags.ini)
+- [武器静态配置](Source/JobDemo/Public/Weapons/WeaponDataAsset.h)
+- [武器实例与换弹](Source/JobDemo/Private/Weapons/WeaponBase.cpp)
+- [双武器组件](Source/JobDemo/Private/Weapons/WeaponComponent.cpp)
+- [生命组件](Source/JobDemo/Private/Components/HealthComponent.cpp)
+- [AI 控制器](Source/JobDemo/Private/AI/EnemyAIController.cpp)
+- [随机敌人生成](Source/JobDemo/Private/AI/AISpawner.cpp)
+- [GameMode 与关卡推进](Source/JobDemo/Private/Core/MyGameModeBase.cpp)
+- [GameInstance 与局内成长](Source/JobDemo/Private/Core/MyGameInstance.cpp)
 
 ## Controls
 
-|输入|功能|
-|-|-|
-|WASD|移动|
-|鼠标|控制视角|
-|Space|跳跃|
-|Shift|冲刺|
-|F|交互：拾取武器、拾取钥匙、开关门|
-|鼠标左键|单次射击|
-|R|换弹|
-|Q|切换当前武器与备用武器|
+| 输入 | 功能 |
+| --- | --- |
+| WASD | 移动 |
+| 鼠标 | 控制视角 |
+| Space | 跳跃 |
+| Shift | 冲刺 |
+| F | 交互：拾取武器、拾取钥匙、开关门 |
+| 鼠标左键 | 射击，按住可连续射击 |
+| R | 换弹 |
+| Q | 切换当前武器与备用武器 |
+| 1 | 释放火球技能 |
 
 ## Getting Started
 
-开发环境：
+### 开发环境
 
-* Unreal Engine 5.7
-* C++
-* Visual Studio
-* Windows
+- Unreal Engine 5.7
+- C++
+- Visual Studio
+- Windows
 
-运行源码：
+项目已启用 `GameplayAbilities` 插件，模块依赖包含 `GameplayAbilities`、`GameplayTags`、`GameplayTasks`、`EnhancedInput`、`AIModule`、`NavigationSystem`、`UMG` 与 `Niagara`。
+
+### 运行源码
 
 1. 克隆或下载仓库。
 2. 为 `JobDemo.uproject` 生成 Visual Studio 项目文件。
@@ -343,102 +335,65 @@ AI 同时支持两种巡逻方式：
 5. 进入 `/Game/Maps/NewWorld` 地图。
 6. 点击 Play 运行。
 
-编辑器多人运行：
+### 编辑器多人运行
 
 1. 在 Play 设置中将玩家数量设为 `2`。
 2. 将网络模式设为 `Play As Listen Server`。
-3. 使用独立游戏窗口运行，分别操作主机与客户端。
+3. 使用独立游戏窗口，分别操作主机与客户端。
 
-可检查：
+建议检查以下流程：
 
-* 手枪与步枪拾取、装备及双武器切换。
-* 数据驱动武器伤害与射击冷却。
-* 弹药消耗、换弹补满与当前武器 UI。
-* 空弹匣或换弹期间无法射击，满弹匣无法重复开始换弹。
-* 换弹 Montage 在主机与客户端上的播放、完成与取消。
-* 切枪或死亡时取消换弹。
-* 枪声和枪口特效同步。
-* 命中标记与提示音只发送给射手。
-* 后坐力只影响开枪者自己的视角。
-* 射击与伤害同步。
-* 队伍钥匙共享。
-* 门状态同步。
-* AI 固定巡逻与随机巡逻。
-* AI 感知、追击与目标切换。
-* 随机敌人生成。
-* 玩家和敌人死亡。
-* 三关连续切换。
-* 跨关卡伤害成长。
-* Reward UI。
-* Victory UI。
-* 多人重开。
+- 两把武器的拾取、切换、持续射击与弹药同步。
+- 射击冷却、空弹匣限制、换弹动画及切枪取消换弹。
+- 枪声与枪口特效同步，以及仅射手可见的命中反馈。
+- 主机和客户端分别释放火球，观察弹体与伤害结果。
+- 施法后的蓝量扣除、冷却倒计时及冷却期间的重复施法限制。
+- 蓝量不足或角色死亡后的施法限制。
+- 队伍钥匙共享、门状态同步与 AI 目标切换。
+- 三关推进、枪械伤害成长、胜利和多人重开。
 
 ## Packaging
 
-Windows Development 打包版本支持三关连续运行。
+项目包含 Windows Development 打包配置，并显式加入三张闯关地图：
 
-项目打包配置中显式加入：
+- `/Game/Maps/NewWorld`
+- `/Game/Maps/LevelTwo`
+- `/Game/Maps/LevelThree`
 
-* `/Game/Maps/NewWorld`
-* `/Game/Maps/LevelTwo`
-* `/Game/Maps/LevelThree`
+后续地图需要被 Cook 到打包版本中，供 `ServerTravel` 使用。
 
-保证 `ServerTravel` 使用的后续地图能够被正确 Cook 到 Windows 包中。
-
-同时将部分依赖 Lambda 的 Timer 调整为成员函数与成员 `FTimerHandle` 管理，例如：
-
-* `AMyGameModeBase::CountEnemies`
-* `AMyPlayerController::HideRewardWidget`
-
-用于提高关卡切换过程中对象生命周期管理的稳定性。
+敌人延迟统计、奖励提示隐藏等计时逻辑使用成员函数与成员 `FTimerHandle` 管理。
 
 ## Performance
 
 此前 Windows Development 打包版本的场景性能记录：
 
-|项目|记录|
-|-|-|
-|CPU|Intel i5-12600KF|
-|GPU|NVIDIA RTX 2080 Ti|
-|内部渲染分辨率|约 1400 × 788|
-|Frame|约 4.71 ms|
-|Game Thread|约 1.44 ms|
-|Draw Thread|约 4.70 ms|
-|GPU Time|约 4.13 ms|
-|Draw Calls|约 291|
+| 项目 | 记录 |
+| --- | --- |
+| CPU | Intel i5-12600KF |
+| GPU | NVIDIA RTX 2080 Ti |
+| 内部渲染分辨率 | 约 1400 × 788 |
+| Frame | 约 4.71 ms |
+| Game Thread | 约 1.44 ms |
+| Draw Thread | 约 4.70 ms |
+| GPU Time | 约 4.13 ms |
+| Draw Calls | 约 291 |
 
-以上为此前测试场景的性能基线，不代表最新源码的重新测量结果。
+以上为此前测试场景的性能基线，不代表加入 GAS 后最新源码的重新测量结果。
 
 ## Current Scope
 
-当前 Demo 已支持：
+当前项目用于展示多人 Gameplay 基础实现与持续迭代，主要范围如下：
 
-* 第三人称移动、跳跃与冲刺。
-* 多人服务器权威基础网络架构。
-* 数据驱动武器。
-* 双武器拾取、装备、切换、射击冷却与弹药消耗。
-* 服务器计时换弹、换弹状态复制及 Montage 表现。
-* 切枪和死亡时取消换弹。
-* 枪声、Niagara 枪口特效、命中标记与提示音、简单后坐力。
-* 当前武器弹药 UI。
-* AI 感知、巡逻、追击、攻击与目标切换。
-* AI 随机生成与随机巡逻。
-* 生命值、伤害、死亡和 Ragdoll。
-* 钥匙共享与开门交互。
-* 三关连续多人闯关。
-* 跨关卡局内伤害成长。
-* 通关 Reward UI。
-* 最终 Victory UI。
-* 多人统一重开。
-* Windows 打包运行。
-
-当前武器系统最多持有两把武器，采用手动单次射击、计时换弹和直接补满弹匣的规则。后坐力采用每枪修改视角的简单实现，暂未加入自动回正。
-
-当前局内成长采用固定的伤害倍率提升：
-
-`1.0 → 2.2 → 3.4`
-
-暂未加入随机 Buff 选择、复杂 Build 组合或永久成长系统。
+- GAS 已覆盖火球技能激活、蓝量消耗、冷却、属性复制与 UI 查询。
+- 生命值与伤害仍使用 `ApplyDamage + UHealthComponent`，尚未迁移为 GAS 伤害效果。
+- 火球由服务器执行，尚未加入客户端预测弹体。
+- 枪械射击表现等待服务器确认，尚未加入射击本地预测或延迟补偿。
+- 蓝量当前没有自动恢复机制。
+- 武器最多持有两把；换弹直接补满弹匣，没有备用弹药库存。
+- 后坐力采用每枪修改视角的简单实现，暂未加入自动回正。
+- 局内成长采用固定枪械伤害倍率 `1.0 → 2.2 → 3.4`，火球暂不参与该倍率。
+- 暂未加入随机 Buff 选择、复杂 Build 组合或永久成长系统。
 
 ## Screenshot
 

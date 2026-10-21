@@ -56,7 +56,6 @@ AMyCharacter::AMyCharacter()
 
 	CharacterAttributes =CreateDefaultSubobject<UMyAttributeSet>(TEXT("CharacterAttributes"));
 
-	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Full);
 }
 
