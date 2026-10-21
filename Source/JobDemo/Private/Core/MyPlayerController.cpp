@@ -23,6 +23,8 @@
 #include "UI/HitMakerWidget.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemComponent.h"
+#include "GAS/MyAttributeSet.h"
 void AMyPlayerController::HideCrosshair()
 {
 	if (CrosshairWidget) 
@@ -166,6 +168,15 @@ void AMyPlayerController::BeginPlay()
 			HitMakerWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
+
+	if (ManaWidgetClass)
+	{
+		ManaWidget = CreateWidget<UUserWidget>(this, ManaWidgetClass);
+		if (ManaWidget)
+		{
+			ManaWidget->AddToViewport();
+		}
+	}
 }
 
 void AMyPlayerController::SetupInputComponent()
@@ -291,12 +302,63 @@ void AMyPlayerController::Reward()
 	
 }
 
+
+
 void AMyPlayerController::HideRewardWidget()
 {
 	if (IsValid(RewardWidget))
 	{
 		RewardWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+bool AMyPlayerController::GetManaValues(float& OutCurrentMana, float& OutMaxMana) const
+{
+	OutCurrentMana = 0.f;
+	OutMaxMana = 0.f;
+
+	const AMyCharacter* PlayerCharacter=Cast<AMyCharacter>(GetPawn());
+	if (!IsValid(PlayerCharacter)){return false;}
+
+	const UAbilitySystemComponent* PlayerASC=PlayerCharacter->GetAbilitySystemComponent();
+	if (!IsValid(PlayerASC)) { return false; }
+
+	const UMyAttributeSet* PlayerAttribute=PlayerASC->GetSet<UMyAttributeSet>();
+	if (!IsValid(PlayerAttribute)) { return false; }
+
+	OutCurrentMana = PlayerAttribute->GetMana();
+	OutMaxMana = PlayerAttribute->GetMaxMana();
+
+	return true;
+}
+
+FText AMyPlayerController::GetManaText() const
+{
+	float CurrentMana = 0.f;
+	float MaxMana = 0.f;
+
+	if (!GetManaValues(CurrentMana, MaxMana))
+	{
+		return FText::FromString(TEXT("-- / --"));
+	}
+
+	return FText::FromString(FString::Printf(
+		TEXT("%.0f / %.0f"),
+		CurrentMana,
+		MaxMana));
+}
+
+float AMyPlayerController::GetManaPercent() const
+{
+	float CurrentMana = 0.f;
+	float MaxMana = 0.f;
+
+	if (!GetManaValues(CurrentMana, MaxMana) || MaxMana <= 0.f)
+	{
+		return 0.f;
+	}
+
+	return FMath::Clamp(CurrentMana / MaxMana, 0.f, 1.f);
 }
 
 

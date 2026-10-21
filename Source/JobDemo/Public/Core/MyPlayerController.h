@@ -45,6 +45,15 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void FlashHitMakerWithSound();
+
+	//GAS蓝条蓝量
+	UFUNCTION(BlueprintPure, Category = "GAS")
+	FText GetManaText()const;
+
+	UFUNCTION(BlueprintPure, Category = "GAS")
+	float GetManaPercent()const;
+	
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
 	TObjectPtr<UInputMappingContext>MappingContext;
@@ -121,6 +130,12 @@ protected:
 
 	UFUNCTION(BlueprintPure, Category = "UI")
 	FText GetAmmoText() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget>ManaWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget>ManaWidget;
 protected:
 	virtual void BeginPlay()override;
 
@@ -145,4 +160,6 @@ private:
 
 	FTimerHandle RewardTimer;
 	void HideRewardWidget();
+
+	bool GetManaValues(float& OutCurrentMana, float& OutMaxMana) const;
 };

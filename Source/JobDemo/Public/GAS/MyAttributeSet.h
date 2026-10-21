@@ -35,7 +35,7 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana,Category = "Attributes")
 	FGameplayAttributeData Mana;
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Attributes")
 	FGameplayAttributeData MaxMana;
 
     UFUNCTION()
