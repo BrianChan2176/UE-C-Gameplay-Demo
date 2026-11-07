@@ -57,7 +57,9 @@ void AWeaponBase::playMuzzleFlash()
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
+
 	if (!WeaponData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s没有武器数据配置"), *GetName());
@@ -151,11 +153,13 @@ bool AWeaponBase::EquipTo(USceneComponent* AttachPoint, APawn* OwnerPawn)//进�
 		return false;
 	}
 
+
 	StaticMeshComponent->SetSimulatePhysics(false);
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	SetOwner(OwnerPawn);
-	const bool bIsAttached=AttachToComponent(AttachPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	const bool bIsAttached=AttachToComponent(AttachPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);//武器附着到角色附着点（手上）
+	StaticMeshComponent->SetRelativeTransform(WeaponData->EquipOffset);//角色持有武器模型正确的空间
 	SetInstigator(OwnerPawn);
 
 	if (bIsAttached == false) 

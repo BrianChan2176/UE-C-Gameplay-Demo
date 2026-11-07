@@ -28,6 +28,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "AI")
 	TSubclassOf<AEnemyCharacter>EnemyClass;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI")
+	int SpawnNumber = -1;//如果想的话，用来指定生成具体个敌人数
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

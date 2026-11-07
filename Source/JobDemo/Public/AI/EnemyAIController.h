@@ -77,6 +77,7 @@ private:
 	void ResetAttackCoolDown();
 	FTimerHandle AttackCoolDownTimerHandle;
 	float AttackCoolDown = 1.f;
+	UPROPERTY(EditAnywhere, Category = "AI Chase")
 	float AIAttackRange = 1000.f;
 
 	//随机巡逻参数

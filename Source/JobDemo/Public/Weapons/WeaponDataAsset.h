@@ -57,4 +57,8 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Combat")
     float HorizontalRecoilStrength = 1.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+    FTransform EquipOffset = FTransform::Identity;
+
 };

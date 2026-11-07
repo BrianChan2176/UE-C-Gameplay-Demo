@@ -33,9 +33,9 @@ protected:
 	void HandleDeath();
 
 	//AI射击
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Combat")
 	float AIAttackRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Combat")
 	float AIDamage = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")

@@ -31,7 +31,7 @@ protected:
     TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
     UPROPERTY(EditDefaultsOnly, Category = "Fireball",meta = (ClampMin = "0"))
-    float DamageAmount = 70.f;
+    float DamageAmount = 100.f;
 
 
 private:

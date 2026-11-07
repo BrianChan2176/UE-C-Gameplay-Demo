@@ -23,10 +23,20 @@ AAISpawner::AAISpawner()
 void AAISpawner::BeginPlay()
 {
 	Super::BeginPlay();
-    int32 RandomSpawnNumber = FMath::RandRange(3, 6);//随机敌人数量
-    for (int i=0;i<RandomSpawnNumber;i++)
+    if (SpawnNumber == -1) //如果不指定AI数量则随机生成3-6个
     {
-        SpawnOneEnemy();
+        int32 RandomSpawnNumber = FMath::RandRange(3, 6);//随机敌人数量
+        for (int i = 0;i < RandomSpawnNumber;i++)
+        {
+            SpawnOneEnemy();
+        }
+    }
+    else //否则按程序员指定数量生成AI敌人
+    {
+        for (int i = 0;i < SpawnNumber;i++)
+        {
+            SpawnOneEnemy();
+        }
     }
 }
 
